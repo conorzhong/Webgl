@@ -41,7 +41,7 @@ window.onload = function init() {
 
 function render(program) {
 	// 清空画布
-	gl.clearColor(0, 0, 0, 0);
+	gl.clearColor(1, 1, 1, 1);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	let point = [300,300];
 	let blackR = 250;
