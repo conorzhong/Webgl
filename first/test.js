@@ -63,14 +63,14 @@ function setCircle(point,r,locationUColor,rgba) {
 	let N = 100;
 	
 	for (let i = 0; i <= N; i++) {
-		let theta = i * 2 * Math.PI / (N - 2);
+		let theta = i * 2 * Math.PI / N;
 		let x = point[0]+r * Math.sin(theta);
 		let y = point[1]+r * Math.cos(theta);
 		blackCircle.push(x, y);
 	}
 	gl.uniform4f(locationUColor,...rgba);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blackCircle), gl.STATIC_DRAW);
-	gl.drawArrays(gl.TRIANGLE_FAN, 0, N);
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, N+2);
 }
 
 //二次函数
