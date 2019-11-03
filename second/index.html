@@ -35,6 +35,7 @@
 	}
 	</script>
 	
+	<script type="text/javascript" src="../m4.js"></script>
 	<script type="text/javascript" src="../webgl-utils.js"></script>
 	<script type="text/javascript" src="../webgl-lessons-ui.js"></script>
 	<script type="text/javascript" src="test.js"> </script>
@@ -42,7 +43,7 @@
 </head>
 <body>
 <div>
-	<div id="uiContainer">
+	<div id="uiContainer" class="div-inline">
 		<div id="ui">
 			<div id="x"></div>
 			<div id="y"></div>
@@ -55,12 +56,9 @@
 			<div id="scaleZ"></div>
 		</div>
 	</div>
-	<canvas id="canvas"></canvas>
-	
+	<canvas id="canvas" class="div-inline"></canvas>
 	
 </div>
-
-
 
 
 </body>
@@ -74,4 +72,5 @@
 		height: 100vh;
 		display: block;
 	}
+	.div-inline{ display:inline}
 </style>
