@@ -41,16 +41,19 @@ function main() {
 		return d * Math.PI / 180;
 	}
 	
-	var translation = [45, 150, 0];
-	var rotation = [degToRad(40), degToRad(25), degToRad(325)];
+	var translation = [0, 0, 0];
+	var rotation = [degToRad(0), degToRad(0), degToRad(0)];
 	var scale = [1, 1, 1];
 	
+	//init draw
+	webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	drawScene();
 	
 	// Setup a ui.
 	webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
 	webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
-	webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: gl.canvas.height});
+	webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: 2*gl.canvas.height});
 	webglLessonsUI.setupSlider("#angleX", {value: radToDeg(rotation[0]), slide: updateRotation(0), max: 360});
 	webglLessonsUI.setupSlider("#angleY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 	webglLessonsUI.setupSlider("#angleZ", {value: radToDeg(rotation[2]), slide: updateRotation(2), max: 360});
@@ -81,12 +84,22 @@ function main() {
 		};
 	}
 	
+	window.onresize = function () {
+		// // Tell WebGL how to convert from clip space to pixels
+		// gl.viewport(0, 0, canvas.width, canvas.height);
+		// drawScene();
+		
+		let min = innerHeight < innerWidth ? innerHeight:innerWidth
+		if(min<canvas.width || min<canvas.height){
+			gl.viewport(0,0,min,min);
+		}
+		drawScene()
+	};
+	
 	// Draw the scene.
 	function drawScene() {
 		webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 		
-		// Tell WebGL how to convert from clip space to pixels
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 		
 		// Clear the canvas.
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -142,6 +155,7 @@ function main() {
 		var far = -400;
 		
 		var matrix = m4.orthographic(left, right, bottom, top, near, far);
+		
 		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
 		matrix = m4.xRotate(matrix, rotation[0]);
 		matrix = m4.yRotate(matrix, rotation[1]);
@@ -429,4 +443,5 @@ function setColors(gl) {
 }
 window.onload = function init(){
 	main();
-}
+};
+
