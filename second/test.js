@@ -53,8 +53,8 @@ function main() {
 	
 	// Setup a ui.
 	webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
-	webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
-	webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: 2*gl.canvas.height});
+	// webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
+	// webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: 2*gl.canvas.height});
 	webglLessonsUI.setupSlider("#angleX", {value: radToDeg(rotation[0]), slide: updateRotation(0), max: 360});
 	webglLessonsUI.setupSlider("#angleY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 	webglLessonsUI.setupSlider("#angleZ", {value: radToDeg(rotation[2]), slide: updateRotation(2), max: 360});
@@ -94,7 +94,7 @@ function main() {
 		
 		let min = innerHeight < innerWidth ? innerHeight:innerWidth
 		if(min<canvas.width || min<canvas.height){
-			gl.viewport(0,0,min,min);
+			gl.viewport(0,canvas.height-min,min,min);
 		}
 		drawScene()
 	};
