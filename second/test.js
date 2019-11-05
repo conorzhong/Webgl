@@ -63,7 +63,14 @@ function main() {
 	webglLessonsUI.setupSlider("#scaleX", {value: scale[0], slide: updateScale(0), min: -5, max: 5, step: 0.01, precision: 2});
 	webglLessonsUI.setupSlider("#scaleY", {value: scale[1], slide: updateScale(1), min: -5, max: 5, step: 0.01, precision: 2});
 	webglLessonsUI.setupSlider("#scaleZ", {value: scale[2], slide: updateScale(2), min: -5, max: 5, step: 0.01, precision: 2});
-	
+
+	document.getElementById("foward").onclick = function () {
+		translation[0] += 10*direct[0];
+		translation[1] += 10*direct[1];
+		translation[2] += 10*direct[2];
+		drawScene();
+	}
+
 	function updatePosition(index) {
 		return function(event, ui) {
 			translation[0] += directX[0];
