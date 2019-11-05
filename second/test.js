@@ -40,7 +40,8 @@ function main() {
 	function degToRad(d) {
 		return d * Math.PI / 180;
 	}
-	
+
+	var direct = [1,0,0,1];
 	var translation = [0, 0, 0];
 	var rotation = [degToRad(0), degToRad(0), degToRad(0)];
 	var scale = [1, 1, 1];
@@ -63,7 +64,9 @@ function main() {
 	
 	function updatePosition(index) {
 		return function(event, ui) {
-			translation[index] = ui.value;
+			translation[0] = ui.value*1*direct[0];
+			translation[1] = ui.value*1*direct[1];
+			translation[2] = ui.value*1*direct[2];
 			drawScene();
 		};
 	}
@@ -97,7 +100,7 @@ function main() {
 	};
 	
 	// Draw the scene.
-	function drawScene() {
+	function drawScene(mode) {
 		webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 		
 		
@@ -155,13 +158,20 @@ function main() {
 		var far = -400;
 		
 		var matrix = m4.orthographic(left, right, bottom, top, near, far);
-		
-		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
-		matrix = m4.xRotate(matrix, rotation[0]);
-		matrix = m4.yRotate(matrix, rotation[1]);
-		matrix = m4.zRotate(matrix, rotation[2]);
-		matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
-		
+
+		var T = m4.translation( translation[0], translation[1], translation[2]);
+		var Rx = m4.xRotation(rotation[0]);
+		var Ry = m4.yRotation(rotation[1]);
+		var Rz = m4.zRotation(rotation[2]);
+		var S = m4.scaling(scale[0], scale[1], scale[2]);
+
+		var mvMatrix =  m4.multiply( m4.multiply( m4.multiply( m4.multiply(T,Rx),Ry),Rz),S);
+		matrix = m4.multiply(matrix,mvMatrix);
+		direct = [1,0,0,1];
+		direct = m4.transformDirection(mvMatrix,direct);
+		console.log(direct);
+
+
 		// Set the matrix.
 		gl.uniformMatrix4fv(matrixLocation, false, matrix);
 		
@@ -170,6 +180,8 @@ function main() {
 		var offset = 0;
 		var count = 16 * 6;
 		gl.drawArrays(primitiveType, offset, count);
+
+
 	}
 }
 
