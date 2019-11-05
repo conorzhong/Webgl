@@ -41,7 +41,9 @@ function main() {
 		return d * Math.PI / 180;
 	}
 
-	var direct = [1,0,0,1];
+	var directX = [1,0,0,1];
+	var directY = [0,1,0,1];
+	var directZ = [0,0,1,1];
 	var translation = [0, 0, 0];
 	var rotation = [degToRad(0), degToRad(0), degToRad(0)];
 	var scale = [1, 1, 1];
@@ -64,9 +66,9 @@ function main() {
 	
 	function updatePosition(index) {
 		return function(event, ui) {
-			translation[0] = ui.value*1*direct[0];
-			translation[1] = ui.value*1*direct[1];
-			translation[2] = ui.value*1*direct[2];
+			translation[0] += directX[0];
+			translation[1] += directX[1];
+			translation[2] += directX[2];
 			drawScene();
 		};
 	}
@@ -160,16 +162,18 @@ function main() {
 		var matrix = m4.orthographic(left, right, bottom, top, near, far);
 
 		var T = m4.translation( translation[0], translation[1], translation[2]);
-		var Rx = m4.xRotation(rotation[0]);
-		var Ry = m4.yRotation(rotation[1]);
-		var Rz = m4.zRotation(rotation[2]);
+		console.log(translation);
+		var Rx = m4.axisRotation([1,0,0],rotation[0]);
+		var Ry = m4.axisRotation([0,1,0],rotation[1]);
+		var Rz = m4.axisRotation([0,0,1],rotation[2]);
 		var S = m4.scaling(scale[0], scale[1], scale[2]);
 
 		var mvMatrix =  m4.multiply( m4.multiply( m4.multiply( m4.multiply(T,Rx),Ry),Rz),S);
 		matrix = m4.multiply(matrix,mvMatrix);
-		direct = [1,0,0,1];
-		direct = m4.transformDirection(mvMatrix,direct);
-		console.log(direct);
+		directX = [1,0,0,1];
+		directX = m4.transformDirection(mvMatrix,directX);
+
+		// console.log(direct);
 
 
 		// Set the matrix.
