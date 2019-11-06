@@ -25,7 +25,11 @@ function main() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 	// Put geometry data into buffer
 	setGeometry(gl);
-	
+
+	var newPositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER,newPositionBuffer);
+	setGeometry(gl);
+
 	// Create a buffer to put colors in
 	var colorBuffer = gl.createBuffer();
 	// Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = colorBuffer)
@@ -48,7 +52,14 @@ function main() {
 	var translation = [0, 0, 0];
 	var rotation = [degToRad(0), degToRad(0), degToRad(0)];
 	var scale = [1, 1, 1];
-	
+
+	var directX1 = [1,0,0,1];
+	var directXR1 = [1,0,0,1];
+	var directYR1 = [0,1,0,1];
+	var directZR1 = [0,0,1,1];
+	var translation1 = [0, 0, 0];
+	var rotation1 = [degToRad(0), degToRad(0), degToRad(0)];
+	var scale1 = [1, 1, 1];
 	//init draw
 	webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -65,6 +76,13 @@ function main() {
 	webglLessonsUI.setupSlider("#scaleY", {value: scale[1], slide: updateScale(1), min: 1, max: 5, step: 0.01, precision: 2});
 	webglLessonsUI.setupSlider("#scaleZ", {value: scale[2], slide: updateScale(2), min: 1, max: 5, step: 0.01, precision: 2});
 
+	webglLessonsUI.setupSlider("#angleX1", {value: radToDeg(rotation1[0]), slide: updateRotation1(0), max: 360});
+	webglLessonsUI.setupSlider("#angleY1", {value: radToDeg(rotation1[1]), slide: updateRotation1(1), max: 360});
+	webglLessonsUI.setupSlider("#angleZ1", {value: radToDeg(rotation1[2]), slide: updateRotation1(2), max: 360});
+	webglLessonsUI.setupSlider("#scaleX1", {value: scale1[0], slide: updateScale1(0), min: 1, max: 5, step: 0.01, precision: 2});
+	webglLessonsUI.setupSlider("#scaleY1", {value: scale1[1], slide: updateScale1(1), min: 1, max: 5, step: 0.01, precision: 2});
+	webglLessonsUI.setupSlider("#scaleZ1", {value: scale1[2], slide: updateScale1(2), min: 1, max: 5, step: 0.01, precision: 2});
+
 	document.getElementById("forward").onclick = function () {
 		translation[0] += 100*directX[0];
 		translation[1] += 100*directX[1];
@@ -77,6 +95,19 @@ function main() {
         translation[2] -= 100*directX[2];
         drawScene();
     }
+
+	document.getElementById("forward1").onclick = function () {
+		translation1[0] += 100*directX1[0];
+		translation1[1] += 100*directX1[1];
+		translation1[2] += 100*directX1[2];
+		drawScene();
+	}
+	document.getElementById("backward1").onclick = function () {
+		translation1[0] -= 100*directX1[0];
+		translation1[1] -= 100*directX1[1];
+		translation1[2] -= 100*directX1[2];
+		drawScene();
+	}
 
 	function updatePosition(index) {
 		return function(event, ui) {
@@ -102,18 +133,33 @@ function main() {
 			drawScene();
 		};
 	}
-	
-	window.onresize = function () {
-		// // Tell WebGL how to convert from clip space to pixels
-		// gl.viewport(0, 0, canvas.width, canvas.height);
-		// drawScene();
-		
-		let min = innerHeight < innerWidth ? innerHeight:innerWidth
-		if(min<canvas.width || min<canvas.height){
-			gl.viewport(0,canvas.height-min,min,min);
-		}
-		drawScene()
-	};
+
+
+	function updatePosition1(index) {
+		return function(event, ui) {
+			translation1[0] += directX1[0];
+			translation1[1] += directX1[1];
+			translation1[2] += directX1[2];
+			drawScene();
+		};
+	}
+
+	function updateRotation1(index) {
+		return function(event, ui) {
+			var angleInDegrees = ui.value;
+			var angleInRadians = angleInDegrees * Math.PI / 180;
+			rotation1[index] = angleInRadians;
+			drawScene();
+		};
+	}
+
+	function updateScale1(index) {
+		return function(event, ui) {
+			scale1[index] = ui.value;
+			drawScene();
+		};
+	}
+
 	
 	// Draw the scene.
 	function drawScene() {
@@ -206,8 +252,84 @@ function main() {
 		gl.drawArrays(primitiveType, offset, count);
 
 
+
+
+		// Turn on the position attribute
+		gl.enableVertexAttribArray(positionLocation);
+
+		// Bind the position buffer.
+		gl.bindBuffer(gl.ARRAY_BUFFER, newPositionBuffer);
+
+		// Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+		var size = 3;          // 3 components per iteration
+		var type = gl.FLOAT;   // the data is 32bit floats
+		var normalize = false; // don't normalize the data
+		var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+		var offset = 0;        // start at the beginning of the buffer
+		gl.vertexAttribPointer(
+			positionLocation, size, type, normalize, stride, offset);
+
+		// Turn on the color attribute
+		gl.enableVertexAttribArray(colorLocation);
+
+		// Bind the color buffer.
+		gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+		// Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+		var size = 3;                 // 3 components per iteration
+		var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
+		var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
+		var stride = 0;               // 0 = move forward size * sizeof(type) each iteration to get the next position
+		var offset = 0;               // start at the beginning of the buffer
+		gl.vertexAttribPointer(
+			colorLocation, size, type, normalize, stride, offset);
+
+		matrix = m4.orthographic(left, right, bottom, top, near, far);
+		var T1 = m4.translation( translation1[0], translation1[1], translation1[2]);
+		var Rx1 = m4.axisRotation(directXR1,rotation1[0]);
+		var Ry1 = m4.axisRotation([0,1,0,1],rotation1[1]);
+		var Rz1 = m4.axisRotation([0,0,1,1],rotation1[2]);
+
+		var S1 = m4.scaling(scale1[0], scale1[1], scale1[2]);
+
+		var mvMatrix1 =  m4.multiply( m4.multiply( m4.multiply( m4.multiply(T1,Rx1),Ry1),Rz1),S1);
+		matrix = m4.multiply(matrix,mvMatrix1);
+
+
+		directX1 = [1,0,0,1];
+		directXR1 = [1,0,0,1];
+		directYR1 = [0,1,0,1];
+		directZR1 = [0,0,1,1];
+
+		directX1 = m4.transformNormal(mvMatrix1,directX1);
+		directXR1 = m4.transformNormal(mvMatrix1,directXR1);
+		directYR1 = m4.transformNormal(mvMatrix1,directYR1);
+		directZR1 = m4.transformNormal(mvMatrix1,directZR1);
+
+		// Set the matrix.
+		gl.uniformMatrix4fv(matrixLocation, false, matrix);
+
+		// Draw the geometry.
+		var primitiveType = gl.TRIANGLES;
+		var offset = 0;
+		var count = 16 * 6;
+		gl.drawArrays(primitiveType, offset, count);
+
+
 	}
 
+
+	window.onresize = function () {
+		// Tell WebGL how to convert from clip space to pixels
+		// gl.viewport(0, 0, canvas.width, canvas.height);
+		// drawScene();
+
+		let min = innerHeight < innerWidth ? innerHeight:innerWidth
+		if(min<canvas.width || min<canvas.height){
+			gl.viewport(0,canvas.height-min,min,min);
+		}
+		drawScene()
+	};
 }
 
 // Fill the buffer with the values that define a letter 'F'.
