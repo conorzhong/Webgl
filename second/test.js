@@ -65,12 +65,18 @@ function main() {
 	webglLessonsUI.setupSlider("#scaleY", {value: scale[1], slide: updateScale(1), min: 1, max: 5, step: 0.01, precision: 2});
 	webglLessonsUI.setupSlider("#scaleZ", {value: scale[2], slide: updateScale(2), min: 1, max: 5, step: 0.01, precision: 2});
 
-	document.getElementById("foward").onclick = function () {
-		translation[0] += 10*directX[0];
-		translation[1] += 10*directX[1];
-		translation[2] += 10*directX[2];
+	document.getElementById("forward").onclick = function () {
+		translation[0] += 100*directX[0];
+		translation[1] += 100*directX[1];
+		translation[2] += 100*directX[2];
 		drawScene();
 	}
+    document.getElementById("backward").onclick = function () {
+        translation[0] -= 100*directX[0];
+        translation[1] -= 100*directX[1];
+        translation[2] -= 100*directX[2];
+        drawScene();
+    }
 
 	function updatePosition(index) {
 		return function(event, ui) {
@@ -110,7 +116,7 @@ function main() {
 	};
 	
 	// Draw the scene.
-	function drawScene(mode) {
+	function drawScene() {
 		webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 		
 		
@@ -170,20 +176,25 @@ function main() {
 		var matrix = m4.orthographic(left, right, bottom, top, near, far);
 
 		var T = m4.translation( translation[0], translation[1], translation[2]);
-        var Rx = m4.xRotation(rotation[0]);
-        var Ry = m4.yRotation(rotation[1]);
-        var Rz = m4.zRotation(rotation[2]);
+        var Rx = m4.axisRotation(directXR,rotation[0]);
+        var Ry = m4.axisRotation([0,1,0,1],rotation[1]);
+        var Rz = m4.axisRotation([0,0,1,1],rotation[2]);
+
 		var S = m4.scaling(scale[0], scale[1], scale[2]);
 
 		var mvMatrix =  m4.multiply( m4.multiply( m4.multiply( m4.multiply(T,Rx),Ry),Rz),S);
 		matrix = m4.multiply(matrix,mvMatrix);
 
+
 		directX = [1,0,0,1];
-		directX = m4.transformDirection(mvMatrix,directX);
-		console.log(directX);
+		directXR = [1,0,0,1];
+		directYR = [0,1,0,1];
+		directZR = [0,0,1,1];
 
-		// console.log(direct);
-
+        directX = m4.transformNormal(mvMatrix,directX);
+        directXR = m4.transformNormal(mvMatrix,directXR);
+        directYR = m4.transformNormal(mvMatrix,directYR);
+        directZR = m4.transformNormal(mvMatrix,directZR);
 
 		// Set the matrix.
 		gl.uniformMatrix4fv(matrixLocation, false, matrix);
@@ -196,6 +207,7 @@ function main() {
 
 
 	}
+
 }
 
 // Fill the buffer with the values that define a letter 'F'.
