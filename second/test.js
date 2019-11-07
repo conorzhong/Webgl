@@ -314,8 +314,6 @@ function main() {
 		var offset = 0;
 		var count = 16 * 6;
 		gl.drawArrays(primitiveType, offset, count);
-
-
 	}
 
 
