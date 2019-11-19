@@ -27,14 +27,14 @@ var direct = vec4(0.0, 0.0, 1.0, 1.0);
 //桌腿
 var points_1 = [];
 var colors_1 = [];
-var vColor_1,vPosition_1;
+var vPosition_1;
 var cBuffer_1,vBuffer_1;
 var numVertices_1 = 2*(ms*3*2+ms*6) + ms*3*2
 
 
 
 var zhuomian = vec3(2.5, 0.1, 1.2);//长 高 宽
-var leg = vec3(0.2, 0.2, 0.6);
+var leg = vec3(0.2, 2.0, 0.2);
 
 //备选颜色
 var chooseColors = [
@@ -57,7 +57,7 @@ var viewMatrixLoc;//当前视图矩阵的存储地址
 var viewMatrix;//当前视图矩阵
 var lookx = 0;
 var looky = 0;
-var lookz = 4;
+var lookz = 3;
 var eye = vec3(lookx, looky, lookz);
 const at = vec3(0.0, 0.0, -3.0);
 const up = vec3(0,0, 1.0, 0.0);
@@ -66,10 +66,11 @@ var currentAngle = [0.0, 0.0];
 
 var projectionMatrixLoc;
 var projectionMatrix;//当前投影矩阵
-var fovy = 30.0;
+var fovy = 45.0;
 var aspect = 1.0;
-var near = 0.3;
-var far = 10.0;
+var near = 0.2;
+var far = 100.0;
+
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
 
@@ -77,8 +78,11 @@ window.onload = function init() {
     if(!gl){alert("Webgl isn't available");}
 
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor( 0.0, 0.0, 0.0, 0.0 ); // 透明背景色
-    gl.enable(gl.DEPTH_TEST); // 开启隐藏面消除
+    gl.clearColor( 0.91, 0.92, 0.93, 1.0 );
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
 
     this.setPoints();
 
@@ -90,23 +94,12 @@ window.onload = function init() {
     viewMatrixLoc = gl.getUniformLocation(program, 'viewMatrix');
     
     //设置视点，视线和上方向
-    viewMatrix = lookAt(vec3(this.lookx, this.looky, this.lookz), vec3(0, 0, -4.0), vec3(0, 1, 0));
+    viewMatrix = lookAt(vec3(this.lookx, this.looky, this.lookz), vec3(0, 0, 0), vec3(0, 1, 0));
     //将视图矩阵传递给viewMarix变
     gl.uniformMatrix4fv(viewMatrixLoc, false, flatten(viewMatrix));
 
     //创建缓冲区
-    cBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
-
-    vColor = gl.getAttribLocation(program, "vColor");
-    gl.enableVertexAttribArray(vColor);
-
-    vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
-    vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.enableVertexAttribArray(vPosition);
+    
 
     cBuffer_1 = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer_1);
@@ -120,6 +113,19 @@ window.onload = function init() {
     gl.bufferData(gl.ARRAY_BUFFER, flatten(points_1), gl.STATIC_DRAW);
     vPosition_1 = gl.getAttribLocation(program, "vPosition");
     gl.enableVertexAttribArray(vPosition_1);
+
+    cBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+
+    vColor = gl.getAttribLocation(program, "vColor");
+    gl.enableVertexAttribArray(vColor);
+
+    vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
+    vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.enableVertexAttribArray(vPosition);
 
     modelViewMatrixLoc = gl.getUniformLocation(program, 'modelViewMatrix');
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
@@ -145,12 +151,19 @@ function multMat4Vec4(mat4, vector) {
 
 function render() {
    
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.enable(gl.CULL_FACE);
-	gl.enable(gl.DEPTH_TEST);
-    
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+    gl.clearDepth(1.0);                 // Clear everything
+    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+
+    // Clear the canvas before we start drawing on it.
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     projectionMatrix = perspective(fovy, aspect, near, far);
     gl.uniformMatrix4fv(projectionMatrixLoc,false,flatten(projectionMatrix));
+
+    
 
     //桌子变换
     var init = translate(0, 0, 0); // 初始变换矩阵，用于设置模型的初始位置
@@ -165,22 +178,22 @@ function render() {
     direct = vec4( 0.0, 0.0, 1.0, 1.0 ); // 初始化初始方向
     direct = multMat4Vec4(m, direct);
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
-    //桌子颜色
+    //桌面颜色
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
 
-    //桌子顶点
+    //桌面顶点
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
+    gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
     //桌腿
-    init = translate(0, 0, 0);
-    S = scalem(scalePercent, scalePercent, scalePercent);
-    T = translate(CubeTx, CubeTy, CubeTz);
-    R = rotateY(CubeRotateAngle);
-    modelViewMatrix = mult(mult(mult(init, T), R), S);
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+    // init = translate(0, 0, 0);
+    // S = scalem(scalePercent, scalePercent, scalePercent);
+    // T = translate(CubeTx, CubeTy, CubeTz);
+    // R = rotateY(CubeRotateAngle);
+    // modelViewMatrix = mult(mult(mult(init, T), R), S);
+    // gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer_1);
     gl.vertexAttribPointer(vColor_1,4,gl.FLOAT,false,0,0);
@@ -189,6 +202,8 @@ function render() {
     gl.vertexAttribPointer(vPosition_1, 4, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.LINES, 0, numVertices_1);
 
+    
+
 
     requestAnimationFrame(render);
 }
@@ -196,40 +211,58 @@ function render() {
 
 
 function setPoints() {
-    //画桌子
-    drawDeskSurface(points, colors);//桌面
-    getCylinderVertex(-zhuomian[0]/4,-zhuomian[1]*5/12,0,-1.8-(-zhuomian[2]/2),0.075,
+    
+    getCylinderVertex(-zhuomian[0]/4, -zhuomian[1]*5/12,0,-1.8-(-zhuomian[2]/2),0.075,
     ms,360,2,points_1,colors_1);//左腿
-    getCylinderVertex(zhuomian[0]/4,-zhuomian[1]*5/12,0,-1.8-(-zhuomian[2]/2),0.075,
+    getCylinderVertex(zhuomian[0]/4, -zhuomian[1]*5/12,0,-1.8-(-zhuomian[2]/2),0.075,
     ms,360,2,points_1,colors_1);//右腿
 
     getCircleVertex(-zhuomian[0]/4,-zhuomian[1]*5/12-1.8-(-zhuomian[2]/2),0,0.3,ms,360,0,2,points_1,colors_1);//左底座
     getCircleVertex(zhuomian[0]/4,-zhuomian[1]*5/12-1.8-(-zhuomian[2]/2),0,0.3,ms,360,0,2,points_1,colors_1);//右底座
+
+    //画桌子
+    drawDeskSurface(points, colors);//桌面
+    //drawLeg(points, colors);//方形桌腿
     
 }
 
 function drawDeskSurface(pointArray, ColorArray) {
     //八个顶点
     var surfaceVertices = [
-        vec4(-zhuomian[0]*5/12, -zhuomian[1]*5/12, zhuomian[2]/2, 1.0),//0
-        vec4(-zhuomian[0]/2, zhuomian[1]/2, zhuomian[2]/2, 1.0),//1
-        vec4(zhuomian[0]/2, zhuomian[1]/2, zhuomian[2]/2, 1.0),//2
-        vec4(zhuomian[0]*5/12, -zhuomian[1]*5/12, zhuomian[2]/2, 1.0),//3
-        vec4(-zhuomian[0]*5/12, -zhuomian[1]*5/12, -zhuomian[2]/2, 1.0),//4
-        vec4(-zhuomian[0]/2, zhuomian[1]/2, -zhuomian[2]/2, 1.0),//5
-        vec4(zhuomian[0]/2, zhuomian[1]/2, -zhuomian[2]/2, 1.0),//6
-        vec4(zhuomian[0]*5/12, -zhuomian[1]*5/12, -zhuomian[2]/2, 1.0),//7
+        vec4(-zhuomian[0]/2, zhuomian[1]/2, zhuomian[2]/2, 1.0),//0
+        vec4(-zhuomian[0]*5/12, -zhuomian[1]/2, zhuomian[2]/2, 1.0),//1
+        vec4(zhuomian[0]*5/12, -zhuomian[1]/2, zhuomian[2]/2, 1.0),//2
+        vec4(zhuomian[0]/2, zhuomian[1]/2, zhuomian[2]/2, 1.0),//3
+        vec4(-zhuomian[0]/2, zhuomian[1]/2, -zhuomian[2]/2, 1.0),//4
+        vec4(-zhuomian[0]*5/12, -zhuomian[1]/2, -zhuomian[2]/2, 1.0),//5
+        vec4(zhuomian[0]*5/12, -zhuomian[1]/2, -zhuomian[2]/2, 1.0),//6
+        vec4(zhuomian[0]/2, zhuomian[1]/2, -zhuomian[2]/2, 1.0),//7
     ];
-    quad(surfaceVertices, 0,3,2,1, 2, pointArray, ColorArray); //前
-    quad(surfaceVertices, 2,3,7,6, 2, pointArray, ColorArray);//右
-    quad(surfaceVertices, 0,4,7,3, 1, pointArray, ColorArray);//下
-    quad(surfaceVertices, 1,2,6,5, 0, pointArray, ColorArray);//上
-    quad(surfaceVertices, 4,5,6,7, 2, pointArray, ColorArray);//后
-    quad(surfaceVertices, 0,1,5,4, 2, pointArray, ColorArray);//左
+    quad(surfaceVertices, 0,1,2,3, 2, pointArray, ColorArray); //前
+    quad(surfaceVertices, 2,6,7,3, 2, pointArray, ColorArray);//右
+    quad(surfaceVertices, 1,5,6,2, 1, pointArray, ColorArray);//下
+    quad(surfaceVertices, 0,3,7,4, 0, pointArray, ColorArray);//上
+    quad(surfaceVertices, 4,7,6,5, 2, pointArray, ColorArray);//后
+    quad(surfaceVertices, 0,4,5,1, 2, pointArray, ColorArray);//左
 
 }
 function drawLeg(pointArray, ColorArray) {
-    
+    var legVertices = [
+        vec4(-leg[0]/2 - zhuomian[0]*5/24, -zhuomian[1]/2, zhuomian[2]*5/24+leg[2], 1.0),//0
+        vec4(-leg[0]/2 - zhuomian[0]*5/24, -zhuomian[1]/2-leg[1]/2, zhuomian[2]*5/24+leg[2], 1.0),//1
+        vec4(- zhuomian[0]*5/24,-zhuomian[1]/2-leg[1]/2, zhuomian[2]*5/24+leg[2], 1.0),//2
+        vec4(- zhuomian[0]*5/24, -zhuomian[1]/2, zhuomian[2]*5/24+leg[2], 1.0),//3
+        vec4(-leg[0]/2 - zhuomian[0]*5/24, -zhuomian[1]/2,  zhuomian[2]*5/24, 1.0),//4
+        vec4(-leg[0]/2 - zhuomian[0]*5/24, -zhuomian[1]/2-leg[1]/2,  zhuomian[2]*5/24, 1.0),//5
+        vec4(- zhuomian[0]*5/24, -zhuomian[1]/2-leg[1]/2,  zhuomian[2]*5/24, 1.0),//6
+        vec4(- zhuomian[0]*5/24, -zhuomian[1]/2,  zhuomian[2]*5/24, 1.0),//7
+    ];
+    quad(legVertices, 0,1,2,3, 2, pointArray, ColorArray); //前
+    quad(legVertices, 2,6,7,3, 2, pointArray, ColorArray);//右
+    quad(legVertices, 1,5,6,2, 2, pointArray, ColorArray);//下
+    //quad(legVertices, 0,3,7,4, 0, pointArray, ColorArray);//上
+    quad(legVertices, 4,7,6,5, 2, pointArray, ColorArray);//后
+    quad(legVertices, 0,4,5,1, 2, pointArray, ColorArray);//左
 }
 
 
