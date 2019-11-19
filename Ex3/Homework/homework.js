@@ -182,12 +182,13 @@ function render() {
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
 
-    //桌面顶点
+    //桌面和板凳面顶点
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+    gl.drawArrays(gl.TRIANGLES, 0, numVertices*3);
 
     //桌腿
+
     // init = translate(0, 0, 0);
     // S = scalem(scalePercent, scalePercent, scalePercent);
     // T = translate(CubeTx, CubeTy, CubeTz);
@@ -200,9 +201,10 @@ function render() {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer_1);
     gl.vertexAttribPointer(vPosition_1, 4, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.LINES, 0, numVertices_1);
+    // gl.drawArrays(gl.LINES, 0, numVertices_1);
+    //桌腿和板凳腿
+    gl.drawArrays(gl.LINES, 0, numVertices_1*3);
 
-    
 
 
     requestAnimationFrame(render);
@@ -220,10 +222,20 @@ function setPoints() {
     getCircleVertex(-zhuomian[0]/4,-zhuomian[1]*5/12-1.8-(-zhuomian[2]/2),0,0.3,ms,360,0,2,points_1,colors_1);//左底座
     getCircleVertex(zhuomian[0]/4,-zhuomian[1]*5/12-1.8-(-zhuomian[2]/2),0,0.3,ms,360,0,2,points_1,colors_1);//右底座
 
-    //画桌子
+    //画桌子 和 板凳面
     drawDeskSurface(points, colors);//桌面
     //drawLeg(points, colors);//方形桌腿
-    
+
+
+    //画板凳腿
+    getCylinderVertex(-zhuomian[0]/8, -zhuomian[1]*5/12-0.4,1.5,-1.4-(-zhuomian[2]/2),0.045,
+        ms,360,2,points_1,colors_1);//左腿
+    getCylinderVertex(zhuomian[0]/8, -zhuomian[1]*5/12-0.4,1.5,-1.4-(-zhuomian[2]/2),0.045,
+        ms,360,2,points_1,colors_1);//右腿
+    getCylinderVertex(-zhuomian[0]/8, -zhuomian[1]*5/12-0.4,1,-1.4-(-zhuomian[2]/2),0.045,
+        ms,360,2,points_1,colors_1);//左腿
+    getCylinderVertex(zhuomian[0]/8, -zhuomian[1]*5/12-0.4,1,-1.4-(-zhuomian[2]/2),0.045,
+        ms,360,2,points_1,colors_1);//右腿
 }
 
 function drawDeskSurface(pointArray, ColorArray) {
@@ -245,6 +257,41 @@ function drawDeskSurface(pointArray, ColorArray) {
     quad(surfaceVertices, 4,7,6,5, 2, pointArray, ColorArray);//后
     quad(surfaceVertices, 0,4,5,1, 2, pointArray, ColorArray);//左
 
+    //凳子面
+    var chairSurfaceVertices = [
+        vec4(-zhuomian[0]/5, zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//0
+        vec4(-zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//1
+        vec4(zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//2
+        vec4(zhuomian[0]/5, zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//3
+        vec4(-zhuomian[0]/5, zhuomian[1]/2-0.4, -zhuomian[2]/3+1.25, 1.0),//4
+        vec4(-zhuomian[0]/5, -zhuomian[1]/2-0.4, -zhuomian[2]/3+1.25, 1.0),//5
+        vec4(zhuomian[0]/5, -zhuomian[1]/2-0.4, -zhuomian[2]/3+1.25, 1.0),//6
+        vec4(zhuomian[0]/5, zhuomian[1]/2-0.4, -zhuomian[2]/3+1.25, 1.0),//7
+    ];
+    quad(chairSurfaceVertices, 0,1,2,3, 4, pointArray, ColorArray); //前
+    quad(chairSurfaceVertices, 2,6,7,3, 4, pointArray, ColorArray);//右
+    quad(chairSurfaceVertices, 1,5,6,2, 3, pointArray, ColorArray);//下
+    quad(chairSurfaceVertices, 0,3,7,4, 3, pointArray, ColorArray);//上
+    quad(chairSurfaceVertices, 4,7,6,5, 4, pointArray, ColorArray);//后
+    quad(chairSurfaceVertices, 0,4,5,1, 4, pointArray, ColorArray);//左
+
+    //凳子靠背
+    var chairBackSurfaceVertices = [
+        vec4(-zhuomian[0]/5, zhuomian[1]/2+0.2, zhuomian[2]/3+1.25, 1.0),//0
+        vec4(-zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//1
+        vec4(zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.25, 1.0),//2
+        vec4(zhuomian[0]/5, zhuomian[1]/2+0.2, zhuomian[2]/3+1.25, 1.0),//3
+        vec4(-zhuomian[0]/5, zhuomian[1]/2+0.2, zhuomian[2]/3+1.16, 1.0),//4
+        vec4(-zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.16, 1.0),//5
+        vec4(zhuomian[0]/5, -zhuomian[1]/2-0.4, zhuomian[2]/3+1.16, 1.0),//6
+        vec4(zhuomian[0]/5, zhuomian[1]/2+0.2, zhuomian[2]/3+1.16, 1.0),//7
+    ];
+    quad(chairBackSurfaceVertices, 0,1,2,3, 4, pointArray, ColorArray); //前
+    quad(chairBackSurfaceVertices, 2,6,7,3, 4, pointArray, ColorArray);//右
+    quad(chairBackSurfaceVertices, 1,5,6,2, 3, pointArray, ColorArray);//下
+    quad(chairBackSurfaceVertices, 0,3,7,4, 3, pointArray, ColorArray);//上
+    quad(chairBackSurfaceVertices, 4,7,6,5, 3, pointArray, ColorArray);//后
+    quad(chairBackSurfaceVertices, 0,4,5,1, 4, pointArray, ColorArray);//左
 }
 function drawLeg(pointArray, ColorArray) {
     var legVertices = [
