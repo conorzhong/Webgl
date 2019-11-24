@@ -9,8 +9,9 @@ function main() {
     }
 
     //cube bufferInfo
-    let cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl,primitives.createCubeVertices(150));
-    let colorArray = primitives.makeRandomVertexColors(primitives.createCubeVertices(150));
+    let cubeVertices = primitives.createCubeVertices(150);
+    let cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl,cubeVertices);
+    let colorArray = primitives.makeRandomVertexColors(cubeVertices);
     let colorBufferInfo = webglUtils.createBufferInfoFromArrays(gl,colorArray);
 
     // setup GLSL program
@@ -67,9 +68,7 @@ function main() {
         gl.enable(gl.CULL_FACE);
         gl.enable(gl.DEPTH_TEST);
 
-        var numFs = 5;
         var radius = 200;
-
         // Compute the projection matrix
         var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         var zNear = 1;
@@ -79,40 +78,36 @@ function main() {
         // Compute a matrix for the camera
         var cameraMatrix = m4.yRotation(cameraAngleRadians);
         cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 2.5);
-
         // Make a view matrix from the camera matrix
         var viewMatrix = m4.inverse(cameraMatrix);
-
         // Compute a view projection matrix
         var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+        uniformsGlobal.u_matrix = viewProjectionMatrix;
 
-        for (var ii = 0; ii < 3; ++ii) {
-            var angle = ii * Math.PI * 2 / numFs;
-            var x = Math.cos(angle) * radius;
-            var y = Math.sin(angle) * radius;
 
-            // starting with the view projection matrix
-            // compute a matrix for the F
-            var matrix = m4.translate(viewProjectionMatrix, x, 0, y);
-            uniformsGlobal.u_matrix = matrix;
+        //commit uniform
+        webglUtils.setUniforms(programInfo,uniformsGlobal);
+        //commit buffer
+        webglUtils.setBuffersAndAttributes(gl,programInfo,cubeBufferInfo);
+        webglUtils.setBuffersAndAttributes(gl,programInfo,colorBufferInfo);
 
-            //commit uniform
-            webglUtils.setUniforms(programInfo,uniformsGlobal);
-            //commit buffer
-            webglUtils.setBuffersAndAttributes(gl,programInfo,cubeBufferInfo);
-            // Draw the geometry.
-            // gl.drawArrays(gl.TRIANGLES, 0, cubeBufferInfo.numElements);
 
-            webglUtils.setBuffersAndAttributes(gl,programInfo,colorBufferInfo);
-            gl.drawElements(gl.TRIANGLES, cubeBufferInfo.numElements, gl.UNSIGNED_SHORT, 0);
 
-        }
+        // Draw the geometry.
+        // gl.drawArrays(gl.TRIANGLES, 0, cubeBufferInfo.numElements);
+        gl.drawElements(gl.TRIANGLES, cubeBufferInfo.numElements, gl.UNSIGNED_SHORT, 0);
+
+
+
 
         requestAnimationFrame(()=>{
             cameraAngleRadians = degToRad(radToDeg(cameraAngleRadians)+1);
             drawScene();
         })
+
     }
+
+
 }
 
 window.onload=function () {
