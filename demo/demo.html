@@ -1,0 +1,57 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script type=text/javascript src="demo.js"></script>
+    <script src="../twgl-full.js" type="module"></script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- vertex shader -->
+<script  id="3d-vertex-shader" type="x-shader/x-vertex">
+attribute vec4 a_position;
+attribute vec4 a_color;
+
+uniform mat4 u_matrix;
+
+varying vec4 v_color;
+
+void main() {
+  // Multiply the position by the matrix.
+  gl_Position = u_matrix * a_position;
+
+  // Pass the color to the fragment shader.
+  v_color = a_color;
+}
+</script>
+<!-- fragment shader -->
+<script  id="3d-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+// Passed in from the vertex shader.
+varying vec4 v_color;
+
+void main() {
+   gl_FragColor = v_color;
+}
+</script>
+
+</body>
+</html>
+<style>
+    /* 移除边界 */
+
+    /* 设置大小为视域大小 */
+    canvas {
+        width: 500px;
+        height: 500px;
+        display: block;
+    }
+
+</style>
