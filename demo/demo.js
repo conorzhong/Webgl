@@ -17,7 +17,7 @@ function render(time) {
     const fov = 30 * Math.PI / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.5;
-    const zFar = 10;
+    const zFar = 1000;
     const projection = m4.perspective(fov, aspect, zNear, zFar);
     const eye = [2, 4, -6];
     const target = [0, 0, 0];
@@ -40,33 +40,45 @@ function render(time) {
         twgl.setBuffersAndAttributes(gl,programInfo,obj.bufferInfo);
         //每个物体的矩阵
         uniforms.u_localMatrix = obj.localMatrix;
-
+        uniforms.u_color = obj.color;
         //提交uniforms变量
-        twgl.setUniforms(programInfo,obj.bufferInfo);
+        twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
 
     requestAnimationFrame(render);
 }
+
 requestAnimationFrame(render);
 
-//初始化uniforms
+
 const uniforms = {
     u_projection:m4.identity(),
     u_world:m4.identity(),
-    u_localMatrix:m4.identity()
+    u_localMatrix:m4.identity(),
+    u_color:[0,0,0,1]
 };
 
 //物体
 let cube = {
     bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(1)),
-    localMatrix: m4.identity()
+    localMatrix: m4.translation([0,0.5,0]),
+    color : [1,0,0,1],
 };
 
+//地面
 let ground = {
-    bufferInfo:primitives.createXYQuadBufferInfo(gl,2),
-    localMatrix:m4.identity()
+    bufferInfo:twgl.createBufferInfoFromArrays(gl,primitives.createXYQuadVertices(7),m4.rotationX(Math.PI/2)),
+    localMatrix:m4.rotationX(Math.PI/2*3),
+    color:[0,1,0,1],
 };
+
+let F = {
+    bufferInfo:primitives.create3DFBufferInfo(gl),
+    localMatrix:m4.multiply(m4.translation([0,1,0]) , m4.scaling([0.005,0.005,0.005])),
+    color:[0,0,1,1],
+};
+//坐标系
 
 //物体列表
-let objects = [cube,ground];
+let objects = [cube,ground,F];
