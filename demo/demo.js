@@ -28,7 +28,7 @@ function render(time) {
     //视图投影矩阵
     const viewProjection = m4.multiply(projection, view);
     //世界矩阵
-    const world = m4.rotationY(time);
+    const world = m4.rotationY(time/10);
 
     //设置uniform变量
     uniforms.u_projection = viewProjection;
@@ -45,6 +45,11 @@ function render(time) {
         twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
+
+    let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
+    temp = m4.multiply(temp,m4.translation([1,0,0]));
+    temp = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
+    objects[2].localMatrix = temp;
 
     requestAnimationFrame(render);
 }
@@ -75,7 +80,7 @@ let ground = {
 
 let F = {
     bufferInfo:primitives.create3DFBufferInfo(gl),
-    localMatrix:m4.multiply(m4.translation([0,1,0]) , m4.scaling([0.005,0.005,0.005])),
+    localMatrix:m4.identity(),
     color:[0,0,1,1],
 };
 //坐标系
