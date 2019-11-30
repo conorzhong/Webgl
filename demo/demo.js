@@ -28,7 +28,7 @@ function render(time) {
     //视图投影矩阵
     const viewProjection = m4.multiply(projection, view);
     //世界矩阵
-    const world = m4.rotationY(time/10);
+    const world = m4.rotationY(time/6);
 
     //设置uniform变量
     uniforms.u_projection = viewProjection;
@@ -46,12 +46,20 @@ function render(time) {
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
 
-    //试着更新一下下子矩阵
+    //试着更新一下下 F 的矩阵
     let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
     temp = m4.multiply(temp,m4.translation([1,0,0]));
-    temp = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
-    objects[2].localMatrix = temp;
-
+    let localMatrix = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
+    objects[2].localMatrix = localMatrix;
+    
+    
+    //试着更新一下下 FLittle 的矩阵
+    //这个F会指向另一个正在旋转的F
+    let temp1 = m4.lookAt([2,0,0],temp,[0,1,0]);
+    // let temp1 = m4.lookAt(m4.multiply(temp,m4.translation([0.5,0,0])),[0,0,0],[0,1,0])
+    temp1 = m4.multiply(temp1,m4.rotationY(Math.PI/2));
+    objects[3].localMatrix = m4.multiply(temp1,m4.scaling([0.005,0.005,0.005]));
+    
     requestAnimationFrame(render);
 }
 
@@ -64,6 +72,7 @@ const uniforms = {
     u_localMatrix:m4.identity(),
     u_color:[0,0,0,1]
 };
+
 
 //物体
 let cube = {
@@ -79,11 +88,19 @@ let ground = {
     color:[0,1,0,1],
 };
 
+//F
 let F = {
     bufferInfo:primitives.create3DFBufferInfo(gl),
     localMatrix:m4.identity(),
     color:[0,0,1,1],
 };
 
+//F
+let FLittle = {
+    bufferInfo:primitives.create3DFBufferInfo(gl),
+    localMatrix:m4.identity(),
+    color:[0,1,1,1],
+};
+
 //物体列表
-let objects = [cube,ground,F];
+let objects = [cube,ground,F,FLittle];
