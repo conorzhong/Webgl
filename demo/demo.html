@@ -32,25 +32,43 @@
 uniform mat4 u_projection;
 uniform mat4 u_world;
 uniform mat4 u_localMatrix;
+uniform mat4 u_worldInverseTranspose;
 
 attribute vec4 position;
+attribute vec3 normal;
 
-varying vec4 v_position;
+varying vec3 v_normal;
 
 void main() {
-    v_position = u_projection * u_world * u_localMatrix * position;
-    gl_Position = v_position;
+    gl_Position = u_projection * u_world * u_localMatrix * position;
+    
+    //重定向法向量并传递
+    v_normal = mat3(u_worldInverseTranspose) * normal;
+    //v_normal = normal;
 }
 </script>
 <script id="fs" type="notjs">
 precision mediump float;
+
 //临时颜色，将来用纹理嘻嘻wbnmsl图形学
 uniform vec4 u_color;
+uniform vec3 u_reverseLightDirection;
 
-varying vec4 v_position;
+//传递来的
+varying vec3 v_normal;
+
 
 void main() {
-    gl_FragColor = u_color;
+   // 由于 v_normal 是插值出来的，和有可能不是单位向量，
+   // 可以用 normalize 将其单位化。
+   vec3 normal = normalize(v_normal);
+ 
+   float light = dot(u_reverseLightDirection,normal);
+ 
+   gl_FragColor = u_color;
+ 
+   // 将颜色部分（不包括 alpha）和 光照相乘
+   gl_FragColor.rgb *= light;
 }
 </script>
 <script src="../twgl-full.js"></script>
