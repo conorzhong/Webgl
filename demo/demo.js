@@ -21,6 +21,8 @@ function render(time) {
     const zFar = 1000;
     const projection = m4.perspective(fov, aspect, zNear, zFar);
     const eye = [2, 4, 6];
+    //const eye = [0, 1.05, 10];
+
     const target = [0, 0, 0];
     const up = [0, 1, 0];
 
@@ -36,7 +38,7 @@ function render(time) {
     uniforms.u_world = world;
     //光照方向
     uniforms.u_reverseLightDirection = v3.normalize([0.5, 0.7, 1]);
-    
+
 
     gl.useProgram(programInfo.program);
 
@@ -52,19 +54,19 @@ function render(time) {
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
 
-    //试着更新一下下 F 的矩阵
-    let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
-    temp = m4.multiply(temp,m4.translation([1,0,0]));
-    let localMatrix = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
-    objects[2].localMatrix = localMatrix;
-
-    //试着更新一下下 FLittle 的矩阵
-    //这个F会指向另一个正在旋转的F
-    let temp1 = m4.lookAt([2,0,0],temp,[0,1,0]);
-    // let temp1 = m4.lookAt(m4.multiply(temp,m4.translation([0.5,0,0])),[0,0,0],[0,1,0])
-    temp1 = m4.multiply(temp1,m4.rotationY(Math.PI/2));
-    objects[3].localMatrix = m4.multiply(temp1,m4.scaling([0.005,0.005,0.005]));
-    
+    // //试着更新一下下 F 的矩阵
+    // let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
+    // temp = m4.multiply(temp,m4.translation([1,0,0]));
+    // let localMatrix = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
+    // objects[2].localMatrix = localMatrix;
+    //
+    // //试着更新一下下 FLittle 的矩阵
+    // //这个F会指向另一个正在旋转的F
+    // let temp1 = m4.lookAt([2,0,0],temp,[0,1,0]);
+    // // let temp1 = m4.lookAt(m4.multiply(temp,m4.translation([0.5,0,0])),[0,0,0],[0,1,0])
+    // temp1 = m4.multiply(temp1,m4.rotationY(Math.PI/2));
+    // objects[3].localMatrix = m4.multiply(temp1,m4.scaling([0.005,0.005,0.005]));
+    //
     requestAnimationFrame(render);
 }
 
@@ -82,12 +84,7 @@ const uniforms = {
 };
 
 
-//物体
-let cube = {
-    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(1)),
-    localMatrix: m4.translation([0,0.5,0]),
-    color : [1,0,0,1],
-};
+
 
 //地面
 let ground = {
@@ -110,10 +107,119 @@ let FFollow = {
     color:[0,1,1,1],
 };
 
-let cylinder = {
-    bufferInfo:primitives.createCylinderBufferInfo(gl,0.2,3,100,100),
-    localMatrix:m4.translation([1.3,0,0]),
-    color:[1,0,1,1],
+//桌子
+//桌面
+let cube = {
+    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(1)),
+    localMatrix:m4.multiply(m4.translation([0,1,0]),m4.scaling([2,0.1,1])),
+    color : [1.0, 0.96, 0.30, 1.0],
 };
+//桌腿
+let deskleg1 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.075,0.95,100,100),
+    localMatrix:m4.translation([0.5,0.95/2,0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let deskleg2 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.075,0.95,100,100),
+    localMatrix:m4.translation([-0.5,0.95/2,0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let deskleg3 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.075,0.95,100,100),
+    localMatrix:m4.translation([0.5,0.95/2,-0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let deskleg4 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.075,0.95,100,100),
+    localMatrix:m4.translation([-0.5,0.95/2,-0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+//桌脚
+let disc1 = {
+    bufferInfo:primitives.createDiscBufferInfo(gl,0.2,100),
+    localMatrix:m4.translation([0.5,0.001,0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let disc2 = {
+    bufferInfo:primitives.createDiscBufferInfo(gl,0.2,100),
+    localMatrix:m4.translation([0.5,0.001,-0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let disc3 = {
+    bufferInfo:primitives.createDiscBufferInfo(gl,0.2,100),
+    localMatrix:m4.translation([-0.5,0.001,0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let disc4 = {
+    bufferInfo:primitives.createDiscBufferInfo(gl,0.2,100),
+    localMatrix:m4.translation([-0.5,0.001,-0.25]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+
+
+// var chairarrays = {
+//     position: { numComponents: 3, data: [0, 0, 0, 1, 0, 0, 0, 1, 0], },
+//     texcoord: { numComponents: 2, data: [0, 0, 0, 1, 1, 0, 1, 1],                 },
+//     normal:   { numComponents: 3, data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],     },
+//     indices:  { numComponents: 3, data: [0, 1, 2, 1, 2, 3],                       },
+// };
+//椅子
+//椅子坐
+let chairdown = {
+    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.75)),
+    localMatrix:m4.multiply(m4.translation([0,0.5,1]),m4.scaling([1,0.1,1])),
+    color : [0.96, 0.64, 0.66, 1.0],
+
+};
+//椅子背
+let chairback = {
+    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.75)),
+    localMatrix:m4.multiply(m4.multiply(m4.translation([0,0.835,1.375]),m4.rotationX(Math.PI/2)),m4.scaling([1,0.1,1])),
+    color : [0.96, 0.64, 0.66, 1.0],
+};
+//椅子腿
+let chairleg1 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.05,0.4625,100,100),
+    localMatrix:m4.translation([0.75/4,0.4625/2,1+0.75/4]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+let chairleg2 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.05,0.4625,100,100),
+    localMatrix:m4.translation([-0.75/4,0.4625/2,1+0.75/4]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+
+let chairleg3 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.05,0.4625,100,100),
+    localMatrix:m4.translation([0.75/4,0.4625/2,1-0.75/4]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+
+let chairleg4 = {
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.05,0.4625,100,100),
+    localMatrix:m4.translation([-0.75/4,0.4625/2,1-0.75/4]),
+    color:[0.51, 0.33, 0.24, 1.0],
+};
+//电脑
+//电脑体
+let surfaceBody = {
+    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
+    localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0]),m4.rotationX(Math.PI/3)),m4.scaling([1,0.05,0.75])),
+    color : [0.75,0.75,0.75,1.0],
+
+};
+//电脑支架
+let surfaceSupport = {
+    bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
+    localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.375*0.5*Math.sin(Math.PI/3),-0.0625]),m4.rotationX(Math.PI*2/3)),m4.scaling([1,0.05,0.375])),
+    color : [0.75,0.75,0.75,1.0],
+
+};
+
+
 //物体列表
-let objects = [cube,ground,F,FFollow,cylinder];
+let objects = [cube,ground,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,
+    chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
+    surfaceBody,surfaceSupport];
+
