@@ -33,11 +33,11 @@ function render(time) {
     //世界矩阵
     const world = m4.rotationY(time/5);
 
-    //设置uniform变量
+    //设置uniform矩阵
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
     //光照方向
-    uniforms.u_reverseLightDirection = v3.normalize([0.5, 0.7, 1]);
+    uniforms.u_reverseLightDirection = v3.normalize([-0.3, 1, 0]);
 
 
     gl.useProgram(programInfo.program);
@@ -90,7 +90,7 @@ const uniforms = {
 let ground = {
     bufferInfo:twgl.createBufferInfoFromArrays(gl,primitives.createXYQuadVertices(7),m4.rotationX(Math.PI/2)),
     localMatrix:m4.rotationX(Math.PI/2*3),
-    color:[0,1,0,1],
+    color:[...v3.normalize([1,1,1]),1],
 };
 
 //F
