@@ -142,8 +142,8 @@ const uniforms = {
     u_worldInverseTranspose:m4.identity(),
 
     //纹理
-    u_lightWorldPos: [1, 8, -10],
-    u_lightColor: [1, 0.8, 0.8, 1],
+    u_lightWorldPos: [1, 8, 10],
+    u_lightColor: [1, 1, 1, 1],
     u_ambient: [0, 0, 0, 1],
     u_specular: [1, 1, 1, 1],
     u_shininess: 50,
@@ -165,8 +165,8 @@ let ground = {
 //光源
 let lightBulb = {
     bufferInfo:primitives.createSphereBufferInfo(gl,0.05,100,100),
-    localMatrix:m4.translation([-0.6, 2, 0]),
-    color:[0,1,1,1],
+    localMatrix:m4.translation([0.2, 1.6, 2]),
+    color:[255,255,0,1],
 };
 
 //F
