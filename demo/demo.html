@@ -97,7 +97,7 @@ vec4 lit(float l ,float h, float m) {
 void main() {
     // 由于 v_normal 是插值出来的，有可能不是单位向量
     vec3 a_normal = normalize(v_normal);
-    vec4 diffuseColor = texture2D(u_diffuse, v_texCoord);
+    vec4 diffuseColor = texture2D(u_diffuse, v_texCoord)*u_color;
     vec3 surfaceToLight = normalize(v_surfaceToLight);
     vec3 surfaceToView = normalize(v_surfaceToView);
     vec3 halfVector = normalize(surfaceToLight + surfaceToView);
