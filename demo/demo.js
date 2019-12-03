@@ -127,7 +127,18 @@ let textureList = twgl.createTextures(gl,{
             128,
         ]),
         width: 1,
-    }
+    },
+    red:
+    {
+        src:new Uint8Array([255,0,0,255])
+    },
+    green:{
+        src:new Uint8Array([0,255,0,255])
+    },
+    blue:{
+        src:new Uint8Array([0,0,255,255])
+    },
+
 });
 
 
@@ -161,6 +172,27 @@ let ground = {
     color:[...v3.normalize([1,1,1]),1],
     diffuse:textureList.checker,
 };
+let coordinate_x={
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.01,0.3,100,100),
+    localMatrix:m4.multiply(m4.translation([0.15,0,0]),m4.rotationZ(Math.PI/2)),
+    color:[1,0,0,1],
+    diffuse:textureList.red,
+};
+
+let coordinate_y={
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.01,0.3,100,100),
+    localMatrix:m4.translation([0,0.15,0]),
+    color:[0,1,0,1],
+    diffuse:textureList.green,
+};
+
+let coordinate_z={
+    bufferInfo:primitives.createCylinderBufferInfo(gl,0.01,0.3,100,100),
+    localMatrix:m4.multiply(m4.translation([0,0,0.15]),m4.rotationX(Math.PI/2)),
+    color:[0,0,1,1],
+    diffuse:textureList.blue
+};
+
 
 //光源
 let lightBulb = {
@@ -312,7 +344,6 @@ let surfaceSupport = {
 
 
 //物体列表
-let objects = [cube,ground,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,
-    chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
+let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
     surfaceBody,surfaceSupport,lightBulb];
 
