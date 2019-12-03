@@ -141,6 +141,13 @@ let ground = {
     diffuse:textureList.checker,
 };
 
+//光源
+let lightBulb = {
+    bufferInfo:primitives.createSphereBufferInfo(gl,0.05,100,100),
+    localMatrix:m4.translation([-0.6, 2, 0]),
+    color:[0,1,1,1],
+};
+
 //F
 let F = {
     bufferInfo:primitives.create3DFBufferInfo(gl),
@@ -270,5 +277,5 @@ let surfaceSupport = {
 //物体列表
 let objects = [cube,ground,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,
     chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
-    surfaceBody,surfaceSupport];
+    surfaceBody,surfaceSupport,lightBulb];
 
