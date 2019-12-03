@@ -1,6 +1,7 @@
 "use strict";
 const m4 = twgl.m4;
 const v3 = twgl.v3;
+const textures = twgl.texture;
 const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
@@ -39,6 +40,8 @@ function render(time) {
     //光照方向
     uniforms.u_reverseLightDirection = v3.normalize([-0.3, 1, 0]);
 
+    //纹理
+    uniforms.u_texcoord = textureList.checker;
 
     gl.useProgram(programInfo.program);
 
@@ -49,6 +52,8 @@ function render(time) {
         uniforms.u_color = obj.color;
         //逆转置矩阵，光照用
         uniforms.u_worldInverseTranspose = m4.transpose(m4.inverse(m4.multiply(world,obj.localMatrix)));
+        //纹理
+        uniforms.u_diffuse = obj.diffuse;
         //提交uniforms变量
         twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
@@ -73,6 +78,39 @@ function render(time) {
 requestAnimationFrame(render);
 
 
+//纹理
+let textureList = twgl.createTextures(gl,{
+    checker: {
+        mag: gl.NEAREST,
+        min: gl.LINEAR,
+        src: [
+            255, 255, 255, 255,
+            192, 192, 192, 255,
+            192, 192, 192, 255,
+            255, 255, 255, 255,
+        ],
+    },
+    // a 1x8 pixel texture from a typed array.
+    stripe: {
+        mag: gl.NEAREST,
+        min: gl.LINEAR,
+        format: gl.LUMINANCE,
+        src: new Uint8Array([
+            255,
+            128,
+            255,
+            128,
+            255,
+            128,
+            255,
+            128,
+        ]),
+        width: 1,
+    },
+});
+
+
+
 //全局变量
 const uniforms = {
     u_projection:m4.identity(),
@@ -81,6 +119,15 @@ const uniforms = {
     u_color:[0,0,0,1],
     u_reverseLightDirection:m4.identity(),
     u_worldInverseTranspose:m4.identity(),
+
+    //纹理
+    u_lightWorldPos: [1, 8, -10],
+    u_lightColor: [1, 0.8, 0.8, 1],
+    u_ambient: [0, 0, 0, 1],
+    u_specular: [1, 1, 1, 1],
+    u_shininess: 50,
+    u_specularFactor: 1,
+    u_diffuse: textureList.checker,
 };
 
 
@@ -91,6 +138,7 @@ let ground = {
     bufferInfo:twgl.createBufferInfoFromArrays(gl,primitives.createXYQuadVertices(7),m4.rotationX(Math.PI/2)),
     localMatrix:m4.rotationX(Math.PI/2*3),
     color:[...v3.normalize([1,1,1]),1],
+    diffuse:textureList.checker,
 };
 
 //F
@@ -98,6 +146,7 @@ let F = {
     bufferInfo:primitives.create3DFBufferInfo(gl),
     localMatrix:m4.identity(),
     color:[0,0,1,1],
+    diffuse:textureList.checker,
 };
 
 //F
@@ -105,6 +154,7 @@ let FFollow = {
     bufferInfo:primitives.create3DFBufferInfo(gl),
     localMatrix:m4.identity(),
     color:[0,1,1,1],
+    diffuse:textureList.checker,
 };
 
 //桌子
@@ -113,6 +163,7 @@ let cube = {
     bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(1)),
     localMatrix:m4.multiply(m4.translation([0,1,0]),m4.scaling([2,0.1,1])),
     color : [1.0, 0.96, 0.30, 1.0],
+    diffuse:textureList.stripe,
 };
 //桌腿
 let deskleg1 = {
@@ -207,14 +258,12 @@ let surfaceBody = {
     bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
     localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0]),m4.rotationX(Math.PI/3)),m4.scaling([1,0.05,0.75])),
     color : [0.75,0.75,0.75,1.0],
-
 };
 //电脑支架
 let surfaceSupport = {
     bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
     localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.375*0.5*Math.sin(Math.PI/3),-0.0625]),m4.rotationX(Math.PI*2/3)),m4.scaling([1,0.05,0.375])),
     color : [0.75,0.75,0.75,1.0],
-
 };
 
 
