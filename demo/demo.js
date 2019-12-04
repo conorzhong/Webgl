@@ -12,7 +12,7 @@ window.onblur = function() {
 };
 window.onfocus = function() {
     this.document.title = prevTitle;
-};
+};  
 
 //光照
 var lightPosition = [1,8,10];
@@ -100,6 +100,7 @@ function render(){
         uniforms.u_texture = obj.diffuse;
         //检查高光
         uniforms.u_specularFactor = obj.specularFactor ? obj.specularFactor : 0.1;
+        uniforms.u_shininess=obj.shininess? obj.shininess : 100;
         //提交uniforms变量
         twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
@@ -110,7 +111,10 @@ function render(){
 requestAnimationFrame(render);
 
 
-//纹理
+/**# 纹理对象
+ * 纹理和颜色相乘，如果只想设置纹理，则颜色给纯白色;
+ * 如果只想设置颜色，则使用纯白色纹理**white**，颜色正常给
+ */
 let textureList = twgl.createTextures(gl,{
     checker: {
         mag: gl.NEAREST,
@@ -146,6 +150,9 @@ let textureList = twgl.createTextures(gl,{
 
     chair_texture:{src:images.chair_texture},
 
+    keyboad_texture:{src:images.keyboard},
+    
+
     deskleg_texture:{
         mag: gl.NEAREST,
         min: gl.LINEAR,
@@ -172,6 +179,9 @@ let textureList = twgl.createTextures(gl,{
     yin:{
         src:new Uint8Array([192,192,192,255])
     },
+    white:{
+        src:new Uint8Array([255,255,255,255])
+    }
 
 });
 
@@ -189,7 +199,7 @@ const uniforms = {
     //纹理
     u_lightWorldPos: lightPosition,
     u_lightColor: [1, 1, 1, 1],
-    u_ambient: [0.5, 0.5, 0.5, 1],
+    u_ambient: [0.4, 0.4, 0.4, 1],
     u_specular: [1, 1, 1, 1],
     u_shininess: 100,
     u_specularFactor: 0,
@@ -233,7 +243,8 @@ let coordinate_z={
 let lightBulb = {
     bufferInfo:primitives.createSphereBufferInfo(gl,0.05,100,100),
     localMatrix:m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]),
-    color:[255,255,0,1],
+    color:[1,0,0,1],
+    diffuse:textureList.white,
 };
 
 //F
@@ -252,6 +263,7 @@ let cube = {
     color : [1.0, 0.96, 0.30, 1.0],
     diffuse:textureList.stripe,
     specularFactor:0.5,
+    shininess:30,
 };
 //桌腿
 let deskleg1 = {
@@ -354,7 +366,9 @@ let surfaceBody = {
     localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0]),m4.rotationX(Math.PI/3)),m4.scaling([1,0.05,0.75])),
     color : [0.9,0.9,0.9,1.0],
     diffuse:textureList.surface_image,
+    specularFactor:1,
 };
+//电脑屏幕，暂时用不到
 let surfacebody_screen={
     bufferInfo:primitives.createXYQuadBufferInfo(gl,0.5),
     localMatrix:m4.multiply(m4.multiply(m4.translation([0.015,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0.015]),m4.rotationX(-Math.PI/6)),m4.scaling([1,0.75,1])),
@@ -369,10 +383,16 @@ let surfaceSupport = {
     color : [0.75,0.75,0.75,1.0],
     diffuse:textureList.microsoft,
 };
+let surfaceKeyboard={
+    bufferInfo:primitives.createCubeBufferInfo(gl,0.5),
+    localMatrix:m4.multiply(m4.translation([0,1.06,0.3]),m4.scaling([1,0.01,0.8])),
+    color:[1,1,1,1],
+    diffuse:textureList.keyboad_texture,
+}
 
 
 //物体列表
 let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,
     deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4
     ,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
-    surfaceBody,surfaceSupport,lightBulb];
+    surfaceBody,surfaceSupport,lightBulb,surfaceKeyboard];
