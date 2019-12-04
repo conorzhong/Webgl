@@ -26,6 +26,10 @@
 <body>
 <canvas id="c"></canvas>
 <div id="b">计算机图形学</div>
+<p>光源：
+    <button id = "lightLeft">向左</button>
+    <button id = "lightRight">向右</button>
+</p>
 </body>
 
 <script id="vs" type="notjs">
@@ -58,6 +62,7 @@ void main() {
     //纹理
     v_texCoord = texcoord;
     v_position = u_projection * u_world * u_localMatrix * position;
+
     v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
     v_surfaceToLight = u_lightWorldPos - (u_world * u_localMatrix * position).xyz;
     v_surfaceToView = (u_viewInverse[3] - (u_world * u_localMatrix * position)).xyz;
@@ -69,7 +74,6 @@ precision mediump float;
 
 //临时颜色，将来用纹理嘻嘻wbnmsl图形学
 uniform vec4 u_color;
-uniform vec3 u_reverseLightDirection;
 
 //传递来的
 varying vec3 v_normal;
@@ -113,4 +117,5 @@ void main() {
 <script src="../twgl-full.js"></script>
 <script src="images.js"></script>
 <script src="demo.js"></script>
+<script src="../webgl-lessons-ui.js"></script>
 </html>
