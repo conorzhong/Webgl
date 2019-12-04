@@ -1,13 +1,15 @@
 "use strict";
 const m4 = twgl.m4;
 const v3 = twgl.v3;
-const textures = twgl.texture;//???????
+const textures = twgl.texture;//???????li'g
 const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 
+//光照
 var lightPosition = [1,8,10];
 
+//webglLessonsUI.setupSlider("lightY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 
 var time = 0.0;//全局计时器
 var tid;//计时器编号
@@ -18,12 +20,6 @@ function timer(){
 function start(){
     tid = setInterval(timer,1);
 }
-// function radToDeg(r) {
-//     return r * 180 / Math.PI;
-// }
-// function degToRad(d) {
-//     return d * Math.PI / 180;
-// }
 // var fRotationRadians = 0;
 // function updateRotation(event, ui) {
 //     fRotationRadians = degToRad(ui);
@@ -91,10 +87,9 @@ function render(){
     //设置uniform矩阵
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
-    //光照方向
-    //var reverselightDirection = [-0.3, 1, 0];
-    uniforms.u_reverseLightDirection = v3.normalize(reverselightDirection);
 
+    uniforms.u_viewInverse = camera;
+    uniforms.u_lightWorldPos = m4.transformPoint(world,lightPosition);
     //纹理
     //uniforms.u_texcoord = textureList.checker;
 
