@@ -1,20 +1,18 @@
 "use strict";
 const m4 = twgl.m4;
 const v3 = twgl.v3;
-const textures = twgl.texture;//???????li'g
+const textures = twgl.texture;//???????
 const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
-let prevtitle = this.document.title
+let prevTitle = this.document.title;
 window.onblur = function() {
-    prevtitle = this.document.title
-    this.document.title = "???你在做什么"
-}
+    prevTitle = this.document.title;
+    this.document.title = "???你在做什么";
+};
 window.onfocus = function() {
-    this.document.title = prevtitle
-}
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
+    this.document.title = prevTitle;
+};
 
 //光照
 var lightPosition = [1,8,10];
@@ -29,22 +27,6 @@ function timer(){
 function start(){
     tid = setInterval(timer,1);
 }
-// function radToDeg(r) {
-//     return r * 180 / Math.PI;
-// }
-// function degToRad(d) {
-//     return d * Math.PI / 180;
-// }
-// var fRotationRadians = 0;
-// function updateRotation(event, ui) {
-//     fRotationRadians = degToRad(ui);
-//     let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(fRotationRadians));
-//     temp = m4.multiply(temp,m4.translation([1,0,0]));
-//     let localMatrix = m4.multiply(temp, m4.scaling([2,2,2]));
-//     objects[18].localMatrix = localMatrix;
-//     console.log(fRotationRadians);
-//
-// }
 
 document.getElementById("lightLeft").onclick = function() {
     lightPosition[0]-=0.5;
@@ -68,8 +50,6 @@ document.getElementById("start").onclick = function() {
     start();
 };
 
-
-//webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
 function render(){
     //time *= 0.001;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -80,7 +60,6 @@ function render(){
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-
     //照相机
     const fov = 30 * Math.PI / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -88,7 +67,6 @@ function render(){
     const zFar = 1000;
     const projection = m4.perspective(fov, aspect, zNear, zFar);
     const eye = [2, 4, 6];
-    //const eye = [0, 1.05, 10];
 
     const target = [0, 0, 0];
     const up = [0, 1, 0];
@@ -103,11 +81,10 @@ function render(){
     //设置uniform矩阵
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
-
     uniforms.u_viewInverse = camera;
+
+    //光源位置更新
     uniforms.u_lightWorldPos = m4.transformPoint(world,lightPosition);
-    //纹理
-    //uniforms.u_texcoord = textureList.checker;
 
     gl.useProgram(programInfo.program);
 
@@ -120,25 +97,13 @@ function render(){
         //逆转置矩阵，光照用
         uniforms.u_worldInverseTranspose = m4.transpose(m4.inverse(m4.multiply(world,obj.localMatrix)));
         //纹理
-        uniforms.u_diffuse = obj.diffuse;
+        uniforms.u_texture = obj.diffuse;
+        //检查高光
+        uniforms.u_specularFactor = obj.specularFactor ? obj.specularFactor : 0.1;
         //提交uniforms变量
         twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
-
-     //试着更新一下下 F 的矩阵
-    // let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
-    // temp = m4.multiply(temp,m4.translation([1,0,0]));
-    // let localMatrix = m4.multiply(temp, m4.scaling([2,2,2]));
-    // objects[18].localMatrix = localMatrix;
-
-    // //试着更新一下下 FLittle 的矩阵
-    // //这个F会指向另一个正在旋转的F
-    // let temp1 = m4.lookAt([2,0,0],temp,[0,1,0]);
-    // // let temp1 = m4.lookAt(m4.multiply(temp,m4.translation([0.5,0,0])),[0,0,0],[0,1,0])
-    // temp1 = m4.multiply(temp1,m4.rotationY(Math.PI/2));
-    // objects[3].localMatrix = m4.multiply(temp1,m4.scaling([0.005,0.005,0.005]));
-    //
 
     requestAnimationFrame(render);
 }
@@ -220,10 +185,10 @@ const uniforms = {
     //纹理
     u_lightWorldPos: lightPosition,
     u_lightColor: [1, 1, 1, 1],
-    u_ambient: [0, 0, 0, 1],
+    u_ambient: [0.5, 0.5, 0.5, 1],
     u_specular: [1, 1, 1, 1],
-    u_shininess: 50,
-    u_specularFactor: 1,  
+    u_shininess: 100,
+    u_specularFactor: 0,
     u_texture: textureList.check,
 };
 
@@ -236,6 +201,7 @@ let ground = {
     localMatrix:m4.rotationX(Math.PI/2*3),
     color:[...v3.normalize([1,1,1]),1],
     diffuse:textureList.checker,
+    specularFactor:0,
 };
 let coordinate_x={
     bufferInfo:primitives.createCylinderBufferInfo(gl,0.01,0.3,100,100),
@@ -274,14 +240,6 @@ let F = {
     diffuse:textureList.checker,
 };
 
-//F
-let FFollow = {
-    bufferInfo:primitives.create3DFBufferInfo(gl),
-    localMatrix:m4.identity(),
-    color:[0,1,1,1],
-    diffuse:textureList.checker,
-};
-
 //桌子
 //桌面
 let cube = {
@@ -289,6 +247,7 @@ let cube = {
     localMatrix:m4.multiply(m4.translation([0,1,0]),m4.scaling([2,0.1,1])),
     color : [1.0, 0.96, 0.30, 1.0],
     diffuse:textureList.stripe,
+    specularFactor:0.5,
 };
 //桌腿
 let deskleg1 = {
@@ -342,13 +301,6 @@ let disc4 = {
     diffuse:textureList.deskleg_texture,
 };
 
-
-// var chairarrays = {
-//     position: { numComponents: 3, data: [0, 0, 0, 1, 0, 0, 0, 1, 0], },
-//     texcoord: { numComponents: 2, data: [0, 0, 0, 1, 1, 0, 1, 1],                 },
-//     normal:   { numComponents: 3, data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],     },
-//     indices:  { numComponents: 3, data: [0, 1, 2, 1, 2, 3],                       },
-// };
 //椅子
 //椅子坐
 let chairdown = {
@@ -398,6 +350,7 @@ let surfaceBody = {
     localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0]),m4.rotationX(Math.PI/3)),m4.scaling([1,0.05,0.75])),
     color : [0.75,0.75,0.75,1.0],
     diffuse:textureList.surface_image,
+    specularFactor:1,
 };
 //电脑支架
 let surfaceSupport = {
@@ -409,5 +362,7 @@ let surfaceSupport = {
 
 
 //物体列表
-let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
+let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,
+    deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4
+    ,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
     surfaceBody,surfaceSupport,lightBulb];
