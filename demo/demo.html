@@ -62,6 +62,7 @@ void main() {
     //纹理
     v_texCoord = texcoord;
     v_position = u_projection * u_world * u_localMatrix * position;
+
     v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
     v_surfaceToLight = u_lightWorldPos - (u_world * u_localMatrix * position).xyz;
     v_surfaceToView = (u_viewInverse[3] - (u_world * u_localMatrix * position)).xyz;
@@ -73,7 +74,6 @@ precision mediump float;
 
 //临时颜色，将来用纹理嘻嘻wbnmsl图形学
 uniform vec4 u_color;
-uniform vec3 u_reverseLightDirection;
 
 //传递来的
 varying vec3 v_normal;
