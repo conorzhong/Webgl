@@ -19,14 +19,22 @@ window.onfocus = function() {
 //光照
 var lightPosition = [1,8,10];
 
-//webglLessonsUI.setupSlider("lightY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 
-function radToDeg(r) {
-    return r * 180 / Math.PI;
+var time = 0.0;//全局计时器
+var tid;//计时器编号
+
+function timer(){
+    time += 0.002;
 }
-function degToRad(d) {
-    return d * Math.PI / 180;
+function start(){
+    tid = setInterval(timer,1);
 }
+// function radToDeg(r) {
+//     return r * 180 / Math.PI;
+// }
+// function degToRad(d) {
+//     return d * Math.PI / 180;
+// }
 // var fRotationRadians = 0;
 // function updateRotation(event, ui) {
 //     fRotationRadians = degToRad(ui);
@@ -50,11 +58,27 @@ document.getElementById("lightRight").onclick = function() {
     var temp = m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]);
     var lb = objects.find(v=>v===lightBulb);
     lb.localMatrix = temp;
-    lb.localMatrix = temp;
 };
+
+document.getElementById("stop").onclick = function() {
+    clearInterval(tid);
+};
+
+document.getElementById("start").onclick = function() {
+    start();
+};
+
+
 //webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
+function render(){
+    //time *= 0.001;
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
 
 
     //照相机
@@ -73,19 +97,13 @@ document.getElementById("lightRight").onclick = function() {
     const view = m4.inverse(camera);
     //视图投影矩阵
     const viewProjection = m4.multiply(projection, view);
-function render(time) {
-    time *= 0.001;
-    twgl.resizeCanvasToDisplaySize(gl.canvas);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-
     //世界矩阵
-    const world = m4.rotationY(time/5);
+    const world = m4.rotationY(time);
+
     //设置uniform矩阵
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
+
     uniforms.u_viewInverse = camera;
     uniforms.u_lightWorldPos = m4.transformPoint(world,lightPosition);
     //纹理
@@ -102,7 +120,7 @@ function render(time) {
         //逆转置矩阵，光照用
         uniforms.u_worldInverseTranspose = m4.transpose(m4.inverse(m4.multiply(world,obj.localMatrix)));
         //纹理
-        uniforms.u_texture = obj.diffuse;
+        uniforms.u_diffuse = obj.diffuse;
         //提交uniforms变量
         twgl.setUniforms(programInfo,uniforms);
         twgl.drawBufferInfo(gl,obj.bufferInfo);
@@ -156,7 +174,7 @@ let textureList = twgl.createTextures(gl,{
         ]),
         width: 1,
     },
-    
+
     microsoft:{src:images.microsoft_logo,},
 
     surface_image:{src:images.surface_image,},
