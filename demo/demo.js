@@ -6,7 +6,40 @@ const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 
-function render(time) {
+var lightPosition = [1,8,10];
+
+//webglLessonsUI.setupSlider("lightY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
+
+function radToDeg(r) {
+    return r * 180 / Math.PI;
+}
+function degToRad(d) {
+    return d * Math.PI / 180;
+}
+// var fRotationRadians = 0;
+// function updateRotation(event, ui) {
+//     fRotationRadians = degToRad(ui);
+//     let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(fRotationRadians));
+//     temp = m4.multiply(temp,m4.translation([1,0,0]));
+//     let localMatrix = m4.multiply(temp, m4.scaling([2,2,2]));
+//     objects[18].localMatrix = localMatrix;
+//     console.log(fRotationRadians);
+//
+// }
+
+document.getElementById("lightLeft").onclick = function() {
+    lightPosition[0]-=0.5;
+    var temp = m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]);
+    objects[18].localMatrix = temp;
+};
+
+document.getElementById("lightRight").onclick = function() {
+    lightPosition[0]+=0.5;
+    var temp1 = m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]);
+    objects[18].localMatrix = temp1;
+};
+//webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
+function render(time){
     time *= 0.001;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -14,6 +47,8 @@ function render(time) {
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
 
     //照相机
     const fov = 30 * Math.PI / 180;
@@ -38,12 +73,14 @@ function render(time) {
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
     //光照方向
-    uniforms.u_reverseLightDirection = v3.normalize([-0.3, 1, 0]);
+    var reverselightDirection = [-0.3, 1, 0];
+    uniforms.u_reverseLightDirection = v3.normalize(reverselightDirection);
 
     //纹理
     //uniforms.u_texcoord = textureList.checker;
 
-    gl.useProgram(programInfo.program); 
+    gl.useProgram(programInfo.program);
+
 
     objects.forEach(function (obj) {
         twgl.setBuffersAndAttributes(gl,programInfo,obj.bufferInfo);
@@ -59,12 +96,12 @@ function render(time) {
         twgl.drawBufferInfo(gl,obj.bufferInfo);
     });
 
-    // //试着更新一下下 F 的矩阵
+     //试着更新一下下 F 的矩阵
     // let temp = m4.multiply(m4.translation([0,0,0]),m4.rotationY(time));
     // temp = m4.multiply(temp,m4.translation([1,0,0]));
-    // let localMatrix = m4.multiply(temp, m4.scaling([0.005,0.005,0.005]));
-    // objects[2].localMatrix = localMatrix;
-    //
+    // let localMatrix = m4.multiply(temp, m4.scaling([2,2,2]));
+    // objects[18].localMatrix = localMatrix;
+
     // //试着更新一下下 FLittle 的矩阵
     // //这个F会指向另一个正在旋转的F
     // let temp1 = m4.lookAt([2,0,0],temp,[0,1,0]);
@@ -72,9 +109,9 @@ function render(time) {
     // temp1 = m4.multiply(temp1,m4.rotationY(Math.PI/2));
     // objects[3].localMatrix = m4.multiply(temp1,m4.scaling([0.005,0.005,0.005]));
     //
+
     requestAnimationFrame(render);
 }
-
 requestAnimationFrame(render);
 
 
@@ -142,7 +179,7 @@ const uniforms = {
     u_worldInverseTranspose:m4.identity(),
 
     //纹理
-    u_lightWorldPos: [1, 8, 10],
+    u_lightWorldPos: lightPosition,
     u_lightColor: [1, 1, 1, 1],
     u_ambient: [0, 0, 0, 1],
     u_specular: [1, 1, 1, 1],
@@ -165,7 +202,7 @@ let ground = {
 //光源
 let lightBulb = {
     bufferInfo:primitives.createSphereBufferInfo(gl,0.05,100,100),
-    localMatrix:m4.translation([0.2, 1.6, 2]),
+    localMatrix:m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]),
     color:[255,255,0,1],
 };
 
