@@ -186,6 +186,10 @@ let textureList = twgl.createTextures(gl,{
         src:new Uint8Array([0,0,255,255])
     },
 
+    yin:{
+        src:new Uint8Array([192,192,192,255])
+    },
+
 });
 
 
@@ -378,7 +382,13 @@ let chairleg4 = {
 let surfaceBody = {
     bufferInfo : twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
     localMatrix:m4.multiply(m4.multiply(m4.translation([0,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0]),m4.rotationX(Math.PI/3)),m4.scaling([1,0.05,0.75])),
-    color : [0.75,0.75,0.75,1.0],
+    color : [0.9,0.9,0.9,1.0],
+    diffuse:textureList.surface_image,
+};
+let surfacebody_screen={
+    bufferInfo:primitives.createXYQuadBufferInfo(gl,0.5),
+    localMatrix:m4.multiply(m4.multiply(m4.translation([0.015,1.05+0.5*0.75*0.5*Math.sin(Math.PI/3),0.015]),m4.rotationX(-Math.PI/6)),m4.scaling([1,0.75,1])),
+    color:[0.75,0.75,0.75,1.0],
     diffuse:textureList.surface_image,
 };
 //电脑支架
@@ -391,5 +401,6 @@ let surfaceSupport = {
 
 
 //物体列表
-let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
-    surfaceBody,surfaceSupport,lightBulb];
+let objects = [cube,ground,coordinate_x,coordinate_y,coordinate_z,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,surfaceBody,surfaceSupport,lightBulb];
+//cube,ground,coordinate_x,coordinate_y,coordinate_z,deskleg1,deskleg2,deskleg3,deskleg4,disc1,disc2,disc3,disc4,chairdown,chairback,chairleg1,chairleg2,chairleg3,chairleg4,
+//surfaceBody,surfaceSupport,lightBulb
