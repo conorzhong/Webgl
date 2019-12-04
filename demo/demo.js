@@ -8,14 +8,22 @@ const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 
 var lightPosition = [1,8,10];
 
-//webglLessonsUI.setupSlider("lightY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 
-function radToDeg(r) {
-    return r * 180 / Math.PI;
+var time = 0.0;//全局计时器
+var tid;//计时器编号
+
+function timer(){
+    time += 0.002;
 }
-function degToRad(d) {
-    return d * Math.PI / 180;
+function start(){
+    tid = setInterval(timer,1);
 }
+// function radToDeg(r) {
+//     return r * 180 / Math.PI;
+// }
+// function degToRad(d) {
+//     return d * Math.PI / 180;
+// }
 // var fRotationRadians = 0;
 // function updateRotation(event, ui) {
 //     fRotationRadians = degToRad(ui);
@@ -40,9 +48,18 @@ document.getElementById("lightRight").onclick = function() {
     var lb = objects.find(v=>v===lightBulb);
     lb.localMatrix = temp;
 };
+
+document.getElementById("stop").onclick = function() {
+    clearInterval(tid);
+};
+
+document.getElementById("start").onclick = function() {
+    start();
+};
+
 //webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
-function render(time){
-    time *= 0.001;
+function render(){
+    //time *= 0.001;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -69,13 +86,13 @@ function render(time){
     //视图投影矩阵
     const viewProjection = m4.multiply(projection, view);
     //世界矩阵
-    const world = m4.rotationY(time/5);
+    const world = m4.rotationY(time);
 
     //设置uniform矩阵
     uniforms.u_projection = viewProjection;
     uniforms.u_world = world;
     //光照方向
-    var reverselightDirection = [-0.3, 1, 0];
+    //var reverselightDirection = [-0.3, 1, 0];
     uniforms.u_reverseLightDirection = v3.normalize(reverselightDirection);
 
     //纹理
