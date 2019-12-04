@@ -9,7 +9,6 @@ const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 //光照
 var lightPosition = [1,8,10];
 
-//webglLessonsUI.setupSlider("lightY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
 
 var time = 0.0;//全局计时器
 var tid;//计时器编号
@@ -20,6 +19,12 @@ function timer(){
 function start(){
     tid = setInterval(timer,1);
 }
+// function radToDeg(r) {
+//     return r * 180 / Math.PI;
+// }
+// function degToRad(d) {
+//     return d * Math.PI / 180;
+// }
 // var fRotationRadians = 0;
 // function updateRotation(event, ui) {
 //     fRotationRadians = degToRad(ui);
@@ -52,6 +57,7 @@ document.getElementById("stop").onclick = function() {
 document.getElementById("start").onclick = function() {
     start();
 };
+
 
 //webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
 function render(){
