@@ -39,7 +39,6 @@ document.getElementById("lightRight").onclick = function() {
     var temp = m4.translation([lightPosition[0]/5,[lightPosition[1]/5],lightPosition[2]/5]);
     var lb = objects.find(v=>v===lightBulb);
     lb.localMatrix = temp;
-    lb.localMatrix = temp;
 };
 //webglLessonsUI.setupSlider("#lightX", {value: radToDeg(fRotationRadians), slide: updateRotation, min: -360, max: 360});
 function render(time){
