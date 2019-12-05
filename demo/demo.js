@@ -62,17 +62,16 @@ function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-    //照相机
+    //透视投影
     const fov = 30 * Math.PI / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.5;
     const zFar = 1000;
     const projection = m4.perspective(fov, aspect, zNear, zFar);
+    //照相机
     const eye = [2, 4, 6];
-
     const target = [0, 0, 0];
     const up = [0, 1, 0];
-
     const camera = m4.lookAt(eye, target, up);
     const view = m4.inverse(camera);
     //视图投影矩阵
@@ -184,7 +183,6 @@ let textureList = twgl.createTextures(gl, {
     white: {
         src: new Uint8Array([255, 255, 255, 255])
     }
-
 });
 
 
@@ -195,7 +193,6 @@ const uniforms = {
     u_world: m4.identity(),
     u_localMatrix: m4.identity(),
     u_color: [0, 0, 0, 1],
-    u_reverseLightDirection: m4.identity(),
     u_worldInverseTranspose: m4.identity(),
 
     //纹理
