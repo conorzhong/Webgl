@@ -44,10 +44,12 @@ document.getElementById("lightRight").onclick = function() {
 
 document.getElementById("stop").onclick = function() {
     clearInterval(tid);
+    document.getElementById("start").disabled=false;
 };
 
 document.getElementById("start").onclick = function() {
     start();
+    document.getElementById("start").disabled=true;
 };
 
 function render(){
