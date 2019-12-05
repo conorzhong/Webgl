@@ -1,7 +1,7 @@
 "use strict";
 const m4 = twgl.m4;
 const v3 = twgl.v3;
-const textures = twgl.texture;//???????
+const textures = twgl.texture;
 const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
@@ -199,13 +199,13 @@ const uniforms = {
     u_worldInverseTranspose: m4.identity(),
 
     //纹理
-    u_lightWorldPos: lightPosition,
-    u_lightColor: [1, 1, 1, 1],
-    u_ambient: [0.4, 0.4, 0.4, 1],
-    u_specular: [1, 1, 1, 1],
-    u_shininess: 100,
-    u_specularFactor: 0,
-    u_texture: textureList.check,
+    u_lightWorldPos: lightPosition,     //光源位置
+    u_lightColor: [1, 1, 1, 1],         //光源颜色
+    u_ambient: [0.4, 0.4, 0.4, 1],      //环境光
+    u_specular: [1, 1, 1, 1],           //镜面光颜色
+    u_shininess: 100,                   //光照系数
+    u_specularFactor: 0,                //镜面光系数
+    u_texture: textureList.check,       //纹理
 };
 
 
@@ -219,20 +219,20 @@ let ground = {
     diffuse: textureList.checker,
     specularFactor: 0,
 };
+
+//坐标系
 let coordinate_x = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.01, 0.3, 100, 100),
     localMatrix: m4.multiply(m4.translation([0.15, 0, 0]), m4.rotationZ(Math.PI / 2)),
     color: [1, 0, 0, 1],
     diffuse: textureList.red,
 };
-
 let coordinate_y = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.01, 0.3, 100, 100),
     localMatrix: m4.translation([0, 0.15, 0]),
     color: [0, 1, 0, 1],
     diffuse: textureList.green,
 };
-
 let coordinate_z = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.01, 0.3, 100, 100),
     localMatrix: m4.multiply(m4.translation([0, 0, 0.15]), m4.rotationX(Math.PI / 2)),
@@ -241,7 +241,7 @@ let coordinate_z = {
 };
 
 
-//光源
+//光源模拟球
 let lightBulb = {
     bufferInfo: primitives.createSphereBufferInfo(gl, 0.05, 100, 100),
     localMatrix: m4.translation([lightPosition[0] / 5, [lightPosition[1] / 5], lightPosition[2] / 5]),
@@ -268,25 +268,25 @@ let cube = {
     shininess: 30,
 };
 //桌腿
-let deskleg1 = {
+let deskLeg1 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.075, 0.95, 100, 100),
     localMatrix: m4.translation([0.5, 0.95 / 2, 0.25]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.deskleg_texture,
 };
-let deskleg2 = {
+let deskLeg2 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.075, 0.95, 100, 100),
     localMatrix: m4.translation([-0.5, 0.95 / 2, 0.25]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.deskleg_texture,
 };
-let deskleg3 = {
+let deskLeg3 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.075, 0.95, 100, 100),
     localMatrix: m4.translation([0.5, 0.95 / 2, -0.25]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.deskleg_texture,
 };
-let deskleg4 = {
+let deskLeg4 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.075, 0.95, 100, 100),
     localMatrix: m4.translation([-0.5, 0.95 / 2, -0.25]),
     color: [0.51, 0.33, 0.24, 1.0],
@@ -321,41 +321,41 @@ let disc4 = {
 
 //椅子
 //椅子坐
-let chairdown = {
+let chairDown = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.75)),
     localMatrix: m4.multiply(m4.translation([0, 0.5, 1]), m4.scaling([1, 0.1, 1])),
     color: [0.96, 0.64, 0.66, 1.0],
     diffuse: textureList.chair_texture,
 };
 //椅子背
-let chairback = {
+let chairBack = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.75)),
     localMatrix: m4.multiply(m4.multiply(m4.translation([0, 0.835, 1.375]), m4.rotationX(Math.PI / 2)), m4.scaling([1, 0.1, 1])),
     color: [0.96, 0.64, 0.66, 1.0],
     diffuse: textureList.chair_texture,
 };
 //椅子腿
-let chairleg1 = {
+let chairLeg1 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.05, 0.4625, 100, 100),
     localMatrix: m4.translation([0.75 / 4, 0.4625 / 2, 1 + 0.75 / 4]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.chair_texture,
 };
-let chairleg2 = {
+let chairLeg2 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.05, 0.4625, 100, 100),
     localMatrix: m4.translation([-0.75 / 4, 0.4625 / 2, 1 + 0.75 / 4]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.chair_texture,
 };
 
-let chairleg3 = {
+let chairLeg3 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.05, 0.4625, 100, 100),
     localMatrix: m4.translation([0.75 / 4, 0.4625 / 2, 1 - 0.75 / 4]),
     color: [0.51, 0.33, 0.24, 1.0],
     diffuse: textureList.chair_texture,
 };
 
-let chairleg4 = {
+let chairLeg4 = {
     bufferInfo: primitives.createCylinderBufferInfo(gl, 0.05, 0.4625, 100, 100),
     localMatrix: m4.translation([-0.75 / 4, 0.4625 / 2, 1 - 0.75 / 4]),
     color: [0.51, 0.33, 0.24, 1.0],
@@ -385,16 +385,17 @@ let surfaceSupport = {
     color: [0.75, 0.75, 0.75, 1.0],
     diffuse: textureList.microsoft,
 };
+//电脑键盘
 let surfaceKeyboard = {
     bufferInfo: primitives.createCubeBufferInfo(gl, 0.5),
     localMatrix: m4.multiply(m4.translation([0, 1.06, 0.3]), m4.scaling([1, 0.01, 0.8])),
     color: [1, 1, 1, 1],
     diffuse: textureList.keyboad_texture,
-}
+};
 
 
 //物体列表
 let objects = [cube, ground, coordinate_x, coordinate_y, coordinate_z,
-    deskleg1, deskleg2, deskleg3, deskleg4, disc1, disc2, disc3, disc4
-    , chairdown, chairback, chairleg1, chairleg2, chairleg3, chairleg4,
+    deskLeg1, deskLeg2, deskLeg3, deskLeg4, disc1, disc2, disc3, disc4
+    , chairDown, chairBack, chairLeg1, chairLeg2, chairLeg3, chairLeg4,
     surfaceBody, surfaceSupport, lightBulb, surfaceKeyboard];
