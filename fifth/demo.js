@@ -17,17 +17,6 @@ window.onfocus = function () {
 //光照
 var lightPosition = [1, 8, 10];
 
-
-var time = 0.0;//全局计时器
-var tid;//计时器编号
-
-function timer() {
-    time += 0.002;
-}
-function start() {
-    tid = setInterval(timer, 1);
-}
-
 document.getElementById("lightLeft").onclick = function () {
     lightPosition[0] -= 0.5;
     var temp = m4.translation([lightPosition[0] / 5, [lightPosition[1] / 5], lightPosition[2] / 5]);
@@ -42,18 +31,14 @@ document.getElementById("lightRight").onclick = function () {
     lb.localMatrix = temp;
 };
 
-document.getElementById("stop").onclick = function () {
-    clearInterval(tid);
-    document.getElementById("start").disabled = false;
+let worldRotationState = true;
+document.getElementById("worldRotation").onclick = function () {
+    worldRotationState = !worldRotationState;
 };
 
-document.getElementById("start").onclick = function () {
-    start();
-    document.getElementById("start").disabled = true;
-};
 
-function render() {
-    //time *= 0.001;
+function render(time) {
+    time *= 0.001;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -78,7 +63,7 @@ function render() {
     //视图投影矩阵
     const viewProjection = m4.multiply(projection, view);
     //世界矩阵
-    const world = m4.rotationY(time);
+    const world = worldRotationState ? m4.rotationY(time/10) : m4.rotationY(time/Infinity);
 
     //设置uniform矩阵
     uniforms.u_projection = viewProjection;
@@ -202,16 +187,16 @@ const uniforms = {
     u_world: m4.identity(),
     u_localMatrix: m4.identity(),
     u_color: [0, 0, 0, 1],
-    u_reverseLightDirection: m4.identity(),
-    u_worldInverseTranspose: m4.identity(),
+    u_reverseLightDirection: m4.identity(),     //光的反方向，和法向量相乘用
+    u_worldInverseTranspose: m4.identity(),     //世界逆转置矩阵，法向量变换用
 
     //纹理
-    u_lightWorldPos: lightPosition,
-    u_lightColor: [1, 1, 1, 1],
-    u_ambient: [0.4, 0.4, 0.4, 1],
-    u_specular: [1, 1, 1, 1],
-    u_shininess: 100,
-    u_specularFactor: 0,
+    u_lightWorldPos: lightPosition,             //光源位置
+    u_lightColor: [1, 1, 1, 1],                 //自然光的言责
+    u_ambient: [0.4, 0.4, 0.4, 1],              //环境光
+    u_specular: [1, 1, 1, 1],                   //反射光颜色
+    u_shininess: 100,                           //指数
+    u_specularFactor: 0,                        //反射因子
     u_texture: textureList.check,
 };
 
@@ -397,7 +382,7 @@ let surfaceKeyboard = {
     localMatrix: m4.multiply(m4.translation([0, 1.06, 0.3]), m4.scaling([1, 0.01, 0.8])),
     color: [1, 1, 1, 1],
     diffuse: textureList.keyboad_texture,
-}
+};
 
 
 //物体列表
