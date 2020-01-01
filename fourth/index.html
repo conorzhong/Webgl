@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf8">
+
+    <title>计算机图形学</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: monospace;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        #b {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center; 
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="b">计算机图形学</div>
+<p>光源：
+    <button id = "lightLeft">向左</button>
+    <button id = "lightRight">向右</button>
+</p>
+<p>场景漫游：
+    <button id = "stop">停止</button>
+    <button id = "start">开始</button>
+</p>
+</body>
+
+<script id="vs" type="notjs">
+uniform mat4 u_projection;
+uniform mat4 u_world;
+uniform mat4 u_localMatrix;
+uniform mat4 u_worldInverseTranspose;
+//纹理
+uniform vec3 u_lightWorldPos;
+uniform mat4 u_viewInverse;
+
+attribute vec4 position;
+attribute vec3 normal;
+//纹理
+attribute vec2 texcoord;
+
+varying vec3 v_normal;
+//纹理
+varying vec2 v_texCoord;
+//varying vec4 v_position;
+varying vec3 v_surfaceToLight;
+varying vec3 v_surfaceToView;
+
+void main() {
+    gl_Position = u_projection * u_world * u_localMatrix * position;
+
+    //重定向法向量并传递
+    v_normal = mat3(u_worldInverseTranspose) * normal;
+
+    //纹理
+    v_texCoord = texcoord;
+//  v_position = u_projection * u_world * u_localMatrix * position;
+
+//  v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
+    v_surfaceToLight = u_lightWorldPos - (u_world * u_localMatrix * position).xyz;
+    v_surfaceToView = (u_viewInverse[3] - (u_world * u_localMatrix * position)).xyz;
+//  gl_Position = v_position;
+}
+</script>
+<script id="fs" type="notjs">
+precision mediump float;
+
+//临时颜色，将来用纹理嘻嘻wbnmsl图形学
+uniform vec4 u_color;
+
+//传递来的
+varying vec3 v_normal;
+//纹理
+//varying vec4 v_position;
+varying vec2 v_texCoord;
+varying vec3 v_surfaceToLight;
+varying vec3 v_surfaceToView;
+
+//纹理
+uniform vec4 u_lightColor;
+uniform vec4 u_ambient;
+uniform sampler2D u_texture;
+uniform vec4 u_specular;
+uniform float u_shininess;
+uniform float u_specularFactor;
+
+vec4 lit(float l ,float h, float m) {
+  return vec4(1.0,
+              max(l, 0.0),
+              (l > 0.0) ? pow(max(0.0, h), m) : 0.0,
+              1.0);
+}
+
+void main() {
+    // 由于 v_normal 是插值出来的，有可能不是单位向量
+    vec3 a_normal = normalize(v_normal);
+    vec4 diffuseColor = texture2D(u_texture, v_texCoord)*u_color;   
+    vec3 surfaceToLight = normalize(v_surfaceToLight);
+    vec3 surfaceToView = normalize(v_surfaceToView);
+    vec3 halfVector = normalize(surfaceToLight + surfaceToView);
+    vec4 litR = lit(dot(a_normal, surfaceToLight),
+                     dot(a_normal, halfVector), u_shininess);
+    vec4 outColor = vec4((
+    u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
+                u_specular * litR.z * u_specularFactor)).rgb,
+        diffuseColor.a);
+    gl_FragColor = outColor;
+}
+</script>
+<script src="../twgl-full.js"></script>
+<script src="images.js"></script>
+<script src="demo.js"></script>
+<script src="../webgl-lessons-ui.js"></script>
+</html>
