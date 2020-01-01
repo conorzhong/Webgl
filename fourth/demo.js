@@ -8,16 +8,29 @@ const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 let prevTitle = this.document.title;
 window.onblur = function () {
     prevTitle = this.document.title;
-    this.document.title = "???你在做什么";
+    this.document.title = "最终产品";
 };
 window.onfocus = function () {
     this.document.title = prevTitle;
 };
+function radToDeg(r) {
+    return r * 180 / Math.PI;
+}
 
+function degToRad(d) {
+    return d * Math.PI / 180;
+}
 //光照
 var lightPosition = [1, 8, 10];
 
-
+var rotation1 = Math.PI / 3;
+var translation1 = 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3);
+var rotation2 = Math.PI * 2 / 3;
+var translation2 = 1.05 + 0.5 * 0.375 * 0.5 * Math.sin(Math.PI / 3);
+//var rotation = degToRad(0);
+var then = 0;
+var flag = 0;
+var rotationSpeed = 0.25;
 var time = 0.0;//全局计时器
 var tid;//计时器编号
 
@@ -45,15 +58,88 @@ document.getElementById("lightRight").onclick = function () {
 document.getElementById("stop").onclick = function () {
     clearInterval(tid);
     document.getElementById("start").disabled = false;
+    document.getElementById("start").disabled=false;
 };
 
 document.getElementById("start").onclick = function () {
     start();
     document.getElementById("start").disabled = true;
+    document.getElementById("start").disabled=true;
 };
 
-function render() {
+document.getElementById("fold").onclick = function () {
+    flag = 1;
+};
+document.getElementById("recover").onclick = function () {
+    flag = -1;
+};
+function renewSurface() {
+    var temp = m4.multiply(m4.multiply(m4.translation([0, translation1, 0]), m4.rotationX(rotation1)), m4.scaling([1, 0.05, 0.75]))
+    var sb = objects.find(v => v === surfaceBody);
+    sb.localMatrix = temp;
+
+    var temp1 = m4.multiply(m4.multiply(m4.translation([0, translation2, -0.0625]), m4.rotationX(rotation2)), m4.scaling([1, 0.05, 0.375]));
+    var ss = objects.find(v => v === surfaceSupport);
+    ss.localMatrix = temp1;
+
+
+}
+
+function render(now) {
     //time *= 0.001;
+    now *= 0.001;
+    // 减去上一次的时间得到时间差
+    var deltaTime = now - then;
+    // 记住这次时间
+    then = now;
+
+    //rotation += rotationSpeed * deltaTime;
+    if(flag === 1)//折叠
+    {
+        if (rotation1 <= 0)
+            rotation1 = 0;
+        else
+            rotation1 -= rotationSpeed * deltaTime;
+
+        if(rotation2 <= 0)
+            rotation2 = 0;
+        else
+            rotation2 -= rotationSpeed *2 * deltaTime;
+
+        if (translation1 <= 1.07)
+            translation1 = 1.07;
+        else
+            translation1 -= 0.00075;
+
+        if (translation2 <= 1.0)
+            translation2 = 1.0;
+        else
+            translation2 -= 0.00075;
+    }
+    else if(flag === -1)//还原
+    {
+        if (rotation1 >= Math.PI/3)
+            rotation1 = Math.PI/3;
+        else
+            rotation1 += rotationSpeed * deltaTime;
+
+        if(rotation2 >= Math.PI*2/3)
+            rotation2 = Math.PI*2/3;
+        else
+            rotation2 += rotationSpeed *2 * deltaTime;
+
+        if (translation1 >= 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3))
+            translation1 = 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3);
+        else
+            translation1 += 0.00075;
+
+        if (translation2 >= 1.05 + 0.5 * 0.375 * 0.5 * Math.sin(Math.PI / 3))
+            translation2 = 1.05 + 0.5 * 0.375 * 0.5 * Math.sin(Math.PI / 3);
+        else
+            translation2 += 0.00075;
+    }
+
+
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -86,6 +172,8 @@ function render() {
 
     //光源位置更新
     uniforms.u_lightWorldPos = m4.transformPoint(world, lightPosition);
+    //桌面位置更新
+    renewSurface();
 
     gl.useProgram(programInfo.program);
 
@@ -162,7 +250,7 @@ let textureList = twgl.createTextures(gl, {
             200,
             200,
             200,
-            128,
+            200,
         ]),
         width: 1,
     },
@@ -258,7 +346,7 @@ let F = {
 //桌面
 let cube = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(1)),
-    localMatrix: m4.multiply(m4.translation([0, 1, 0]), m4.scaling([2, 0.1, 1])),
+    localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1, 0]), m4.rotationY(0)), m4.scaling([2, 0.1, 1])),
     color: [1.0, 0.96, 0.30, 1.0],
     diffuse: textureList.stripe,
     specularFactor: 0.5,
@@ -362,7 +450,7 @@ let chairLeg4 = {
 //电脑体
 let surfaceBody = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
-    localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3), 0]), m4.rotationX(Math.PI / 3)), m4.scaling([1, 0.05, 0.75])),
+    localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3), 0]), m4.rotationX(rotation1)), m4.scaling([1, 0.05, 0.75])),
     color: [0.9, 0.9, 0.9, 1.0],
     diffuse: textureList.surface_image,
     specularFactor: 1,
@@ -372,13 +460,13 @@ let surfacebody_screen = {
     bufferInfo: primitives.createXYQuadBufferInfo(gl, 0.5),
     localMatrix: m4.multiply(m4.multiply(m4.translation([0.015, 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3), 0.015]), m4.rotationX(-Math.PI / 6)), m4.scaling([1, 0.75, 1])),
     color: [0.75, 0.75, 0.75, 1.0],
-    diffuse: textureList.surface_image,
+
     specularFactor: 1,
 };
 //电脑支架
 let surfaceSupport = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),
-    localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1.05 + 0.5 * 0.375 * 0.5 * Math.sin(Math.PI / 3), -0.0625]), m4.rotationX(Math.PI * 2 / 3)), m4.scaling([1, 0.05, 0.375])),
+    localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1.05 + 0.5 * 0.375 * 0.5 * Math.sin(Math.PI / 3), -0.0625]), m4.rotationX(rotation2)), m4.scaling([1, 0.05, 0.375])),
     color: [0.75, 0.75, 0.75, 1.0],
     diffuse: textureList.microsoft,
 };
@@ -390,9 +478,20 @@ let surfaceKeyboard = {
     diffuse: textureList.keyboad_texture,
 };
 
+//自定义立方体
+// let newCube = {
+//     bufferInfo:twgl.createBufferInfoFromArrays(gl, primitives.createCubeverticesNew(0.3)),
+//     localMatrix: m4.multiply(m4.multiply(m4.translation([0, 1, 0]), m4.rotationY(rotation[1])), m4.scaling([2, 0.1, 1])),
+//     color: [1.0, 0.96, 0.30, 1.0],
+//     diffuse: textureList.stripe,
+//     specularFactor: 0.5,
+//     shininess: 30,
+// }
+
 
 //物体列表
 let objects = [cube, ground, coordinate_x, coordinate_y, coordinate_z,
     deskLeg1, deskLeg2, deskLeg3, deskLeg4, disc1, disc2, disc3, disc4
-    , chairDown, chairBack, chairLeg1, chairLeg2, chairLeg3, chairLeg4,
-    surfaceBody, surfaceSupport, lightBulb, surfaceKeyboard];
+   , chairDown, chairBack, chairLeg1, chairLeg2, chairLeg3, chairLeg4,
+    surfaceBody, surfaceSupport, lightBulb, surfaceKeyboard,
+];
