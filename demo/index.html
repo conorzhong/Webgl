@@ -46,8 +46,8 @@ uniform mat4 u_world;//世界矩阵
 uniform mat4 u_localMatrix;//物体的初始矩阵
 uniform mat4 u_worldInverseTranspose;//世界矩阵逆置矩阵
 //纹理
-uniform vec3 u_lightWorldPos;
-uniform mat4 u_viewInverse;
+uniform vec3 u_lightWorldPos;//光源世界坐标
+uniform mat4 u_viewInverse;//视角的逆矩阵
 
 attribute vec4 position;
 attribute vec3 normal;
@@ -90,9 +90,9 @@ varying vec3 v_surfaceToView;
 uniform vec4 u_lightColor;       //光源颜色
 uniform vec4 u_ambient;          //环境光
 uniform sampler2D u_texture;     //纹理
-uniform vec4 u_specular;         //
-uniform float u_shininess;
-uniform float u_specularFactor;
+uniform vec4 u_specular;         //反射光
+uniform float u_shininess;       //光照
+uniform float u_specularFactor;  //反射因子
 
 //计算漫反射和镜面反射的函数
 vec4 lit(float l ,float h, float m) {
@@ -116,6 +116,7 @@ void main() {
     vec4 litR = lit(dot(a_normal, surfaceToLight),
                      dot(a_normal, halfVector), u_shininess);
     //将漫反射、镜面反射、环境光加权相加，得到最终颜色
+    //zh的文档中有详细解释
     vec4 outColor = vec4((
     u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
                 u_specular * litR.z * u_specularFactor)).rgb,
