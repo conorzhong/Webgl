@@ -6,6 +6,11 @@ const primitives = twgl.primitives;
 const gl = document.querySelector("#c").getContext("webgl");
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 let prevTitle = this.document.title;
+
+/**
+ * 显示网页title的函数，当页面被挡住或者切换title改为“最终产品”，并停止运行程序
+ * 切换回该网页之后正常显示原来的title
+ */
 window.onblur = function () {
     prevTitle = this.document.title;
     this.document.title = "最终产品";
@@ -13,6 +18,7 @@ window.onblur = function () {
 window.onfocus = function () {
     this.document.title = prevTitle;
 };
+
 function radToDeg(r) {
     return r * 180 / Math.PI;
 }
@@ -34,20 +40,22 @@ var rotationSpeed = 0.25;
 var time = 0.0;//全局计时器
 var tid;//计时器编号
 
+//设置旋转速度
 function timer() {
     time += 0.002;
 }
+//开始旋转
 function start() {
     tid = setInterval(timer, 1);
 }
-
+//光源向左移动
 document.getElementById("lightLeft").onclick = function () {
     lightPosition[0] -= 0.5;
     var temp = m4.translation([lightPosition[0] / 5, [lightPosition[1] / 5], lightPosition[2] / 5]);
     var lb = objects.find(v => v === lightBulb);
     lb.localMatrix = temp;
 };
-
+//光源向右移动
 document.getElementById("lightRight").onclick = function () {
     lightPosition[0] += 0.5;
     var temp = m4.translation([lightPosition[0] / 5, [lightPosition[1] / 5], lightPosition[2] / 5]);
@@ -55,24 +63,31 @@ document.getElementById("lightRight").onclick = function () {
     lb.localMatrix = temp;
 };
 
+//停止旋转按钮
 document.getElementById("stop").onclick = function () {
     clearInterval(tid);
     document.getElementById("start").disabled = false;
     document.getElementById("start").disabled=false;
 };
-
+//开始旋转按钮
 document.getElementById("start").onclick = function () {
     start();
     document.getElementById("start").disabled = true;
     document.getElementById("start").disabled=true;
 };
-
+//折叠屏幕按钮
 document.getElementById("fold").onclick = function () {
     flag = 1;
 };
+
+//回复按钮
 document.getElementById("recover").onclick = function () {
     flag = -1;
 };
+
+/**
+ * 更新surface状态的函数，在折叠和恢复过程中使用
+ */
 function renewSurface() {
     var temp = m4.multiply(m4.multiply(m4.translation([0, translation1, 0]), m4.rotationX(rotation1)), m4.scaling([1, 0.05, 0.75]))
     var sb = objects.find(v => v === surfaceBody);
@@ -85,6 +100,7 @@ function renewSurface() {
 
 }
 
+//主要的绘制函数
 function render(now) {
     //time *= 0.001;
     now *= 0.001;
@@ -142,7 +158,7 @@ function render(now) {
 
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
+//开启深度测
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -177,7 +193,12 @@ function render(now) {
 
     gl.useProgram(programInfo.program);
 
-
+    /**
+     * 对物体列表中的每个物体执行相同动作；
+     * 每个物体的绘制只需要知道programInfo，bufferInfo和uniform
+     * 在其中指定每个物体对应的uniform值，bufferInfo；
+     * 一次即可成功绘制所有物体
+     */
     objects.forEach(function (obj) {
         twgl.setBuffersAndAttributes(gl, programInfo, obj.bufferInfo);
         //每个物体的矩阵
@@ -456,13 +477,13 @@ let surfaceBody = {
     specularFactor: 1,
 };
 //电脑屏幕，暂时用不到
-let surfacebody_screen = {
-    bufferInfo: primitives.createXYQuadBufferInfo(gl, 0.5),
-    localMatrix: m4.multiply(m4.multiply(m4.translation([0.015, 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3), 0.015]), m4.rotationX(-Math.PI / 6)), m4.scaling([1, 0.75, 1])),
-    color: [0.75, 0.75, 0.75, 1.0],
+// let surfacebody_screen = {
+//     bufferInfo: primitives.createXYQuadBufferInfo(gl, 0.5),
+//     localMatrix: m4.multiply(m4.multiply(m4.translation([0.015, 1.05 + 0.5 * 0.75 * 0.5 * Math.sin(Math.PI / 3), 0.015]), m4.rotationX(-Math.PI / 6)), m4.scaling([1, 0.75, 1])),
+//     color: [0.75, 0.75, 0.75, 1.0],
 
-    specularFactor: 1,
-};
+//     specularFactor: 1,
+// };
 //电脑支架
 let surfaceSupport = {
     bufferInfo: twgl.createBufferInfoFromArrays(gl, primitives.createCubeVertices(0.5)),

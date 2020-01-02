@@ -41,10 +41,10 @@
 </body>
 
 <script id="vs" type="notjs">
-uniform mat4 u_projection;
-uniform mat4 u_world;
-uniform mat4 u_localMatrix;
-uniform mat4 u_worldInverseTranspose;
+uniform mat4 u_projection;//投影矩阵
+uniform mat4 u_world;//世界矩阵
+uniform mat4 u_localMatrix;//物体的初始矩阵
+uniform mat4 u_worldInverseTranspose;//世界矩阵逆置矩阵
 //纹理
 uniform vec3 u_lightWorldPos;
 uniform mat4 u_viewInverse;
@@ -57,10 +57,11 @@ attribute vec2 texcoord;
 varying vec3 v_normal;
 //纹理
 varying vec2 v_texCoord;
-varying vec3 v_surfaceToLight;
-varying vec3 v_surfaceToView;
+varying vec3 v_surfaceToLight;//物体上的点到光源的向量
+varying vec3 v_surfaceToView;//物体上的点到相机的向量
 
 void main() {
+    //得到物体在相机视图中坐标
     gl_Position = u_projection * u_world * u_localMatrix * position;
 
     //重定向法向量并传递
@@ -68,6 +69,7 @@ void main() {
 
     //纹理
     v_texCoord = texcoord;
+    //计算面到光源与面到相机的向量
     v_surfaceToLight = u_lightWorldPos - (u_world * u_localMatrix * position).xyz;
     v_surfaceToView = (u_viewInverse[3] - (u_world * u_localMatrix * position)).xyz;
 }
@@ -75,11 +77,10 @@ void main() {
 <script id="fs" type="notjs">
 precision mediump float;
 
-//临时颜色，将来用纹理嘻嘻图形学
-uniform vec4 u_color;
+uniform vec4 u_color;//物体颜色
 
 //传递来的
-varying vec3 v_normal;
+varying vec3 v_normal;//向量
 //纹理
 varying vec2 v_texCoord;
 varying vec3 v_surfaceToLight;
@@ -93,6 +94,7 @@ uniform vec4 u_specular;         //
 uniform float u_shininess;
 uniform float u_specularFactor;
 
+//计算漫反射和镜面反射的函数
 vec4 lit(float l ,float h, float m) {
   return vec4(1.0,
               max(l, 0.0),
@@ -103,12 +105,17 @@ vec4 lit(float l ,float h, float m) {
 void main() {
     // 由于 v_normal 是插值出来的，有可能不是单位向量
     vec3 a_normal = normalize(v_normal);
+    //将纹理与物体颜色相乘
     vec4 diffuseColor = texture2D(u_texture, v_texCoord)*u_color;   
+    //单位化面到光源和面到相机的向量
     vec3 surfaceToLight = normalize(v_surfaceToLight);
     vec3 surfaceToView = normalize(v_surfaceToView);
+    //计算面到光源与面到相机的向量的中间单位向量
     vec3 halfVector = normalize(surfaceToLight + surfaceToView);
+    //计算漫反射与镜面反射
     vec4 litR = lit(dot(a_normal, surfaceToLight),
                      dot(a_normal, halfVector), u_shininess);
+    //将漫反射、镜面反射、环境光加权相加，得到最终颜色
     vec4 outColor = vec4((
     u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
                 u_specular * litR.z * u_specularFactor)).rgb,
